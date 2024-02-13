@@ -1,0 +1,48 @@
+{% extends 'allianceauth/base.html' %}
+
+{% block page_title %}Alliance Contacts{% endblock page_title %}
+
+{% block extra_css %}
+    {% include "bundles/datatables-css.html" %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-aa">
+                <thead>
+                    <tr>
+                        <th>Contact</th>
+                        <th>Contact Type</th>
+                        <th>Labels</th>
+                        <th>Standing</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for contact in contacts %}
+                        <tr>
+                            <td>{{ contact.contact_name }}</td>
+                            <td>{{ contact.contact_type }}</td>
+                            <td>{{ contact.labels }}</td>
+                            <td>{{ contact.standing }}</td>
+                            <td>{{ contact.notes }}</td>
+                        </tr>
+                    {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_javascript %}
+    {% include "bundles/datatables-js.html" %}
+{% endblock extra_javascript %}
+
+{% block extra_script %}
+    $(document).ready(function() {
+        $('.table').DataTable({
+            "pageLength": 50
+        });
+    });
+{% endblock extra_script %}

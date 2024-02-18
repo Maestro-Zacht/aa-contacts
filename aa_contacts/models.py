@@ -1,6 +1,7 @@
 from django.db import models
+from django.utils import timezone
 
-from allianceauth.eveonline.models import EveAllianceInfo
+from allianceauth.eveonline.models import EveAllianceInfo, EveCharacter, EveCorporationInfo, EveFactionInfo
 from esi.models import Token
 
 
@@ -59,10 +60,59 @@ class AllianceContact(models.Model):
     class Meta:
         default_permissions = ()
 
+    def __str__(self):
+        return f"{self.alliance} - {self.contact_name}"
+
+    @property
+    def image_src(self) -> str:
+        if self.contact_type == self.ContactTypeOptions.CHARACTER:
+            return EveCharacter.generic_portrait_url(self.contact_id)
+        if self.contact_type == self.ContactTypeOptions.CORPORATION:
+            return EveCorporationInfo.generic_logo_url(self.contact_id)
+        if self.contact_type == self.ContactTypeOptions.ALLIANCE:
+            return EveAllianceInfo.generic_logo_url(self.contact_id)
+        if self.contact_type == self.ContactTypeOptions.FACTION:
+            return EveFactionInfo.generic_logo_url(self.contact_id)
+        return ''
+
+    @property
+    def contact_name(self) -> str:
+        if self.contact_type == self.ContactTypeOptions.CHARACTER:
+            try:
+                res = EveCharacter.objects.get(character_id=self.contact_id).character_name
+            except EveCharacter.DoesNotExist:
+                char = EveCharacter.objects.create_character(self.contact_id)
+                res = char.character_name
+        elif self.contact_type == self.ContactTypeOptions.CORPORATION:
+            try:
+                res = EveCorporationInfo.objects.get(corporation_id=self.contact_id).corporation_name
+            except EveCorporationInfo.DoesNotExist:
+                corp = EveCorporationInfo.objects.create_corporation(self.contact_id)
+                res = corp.corporation_name
+        elif self.contact_type == self.ContactTypeOptions.ALLIANCE:
+            try:
+                res = EveAllianceInfo.objects.get(alliance_id=self.contact_id).alliance_name
+            except EveAllianceInfo.DoesNotExist:
+                alliance = EveAllianceInfo.objects.create_alliance(self.contact_id)
+                res = alliance.alliance_name
+        elif self.contact_type == self.ContactTypeOptions.FACTION:
+            try:
+                res = EveFactionInfo.objects.get(faction_id=self.contact_id).faction_name
+            except EveFactionInfo.DoesNotExist:
+                faction = EveFactionInfo.provider.get_faction(self.contact_id)
+                EveFactionInfo.objects.create(faction_id=faction.id, faction_name=faction.name)
+                res = faction.name
+        else:
+            res = ''
+
+        return res
+
 
 class AllianceToken(models.Model):
     alliance = models.OneToOneField(EveAllianceInfo, on_delete=models.RESTRICT, related_name='+')
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='+')
+
+    last_update = models.DateTimeField(default=timezone.now)
 
     objects = AllianceTokenManager()
 

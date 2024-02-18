@@ -1,11 +1,15 @@
 from celery import shared_task
 
 from django.db import transaction
+from django.utils import timezone
 
 from allianceauth.eveonline.models import EveAllianceInfo
+from allianceauth.services.hooks import get_extension_logger
 
 from .models import AllianceContact, AllianceContactLabel, AllianceToken
 from .provider import esi
+
+logger = get_extension_logger(__name__)
 
 
 @shared_task
@@ -85,7 +89,13 @@ def update_alliance_contacts(alliance_id: int):
             )
 
             contact.labels.clear()
-            contact.labels.set([labels[label_id] for label_id in contact_data['label_ids']])
+            if contact_data['label_ids'] is not None:
+                contact.labels.set([labels[label_id] for label_id in contact_data['label_ids']])
+
+            contact.contact_name
+
+        alliance_token.last_update = timezone.now()
+        alliance_token.save()
 
 
 @shared_task

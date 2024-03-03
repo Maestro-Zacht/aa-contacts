@@ -53,7 +53,7 @@ class AllianceContact(models.Model):
     contact_type = models.CharField(max_length=11, choices=ContactTypeOptions.choices)
     standing = models.FloatField()
 
-    labels = models.ManyToManyField(AllianceContactLabel, related_name='contacts')
+    labels = models.ManyToManyField(AllianceContactLabel, blank=True, related_name='contacts')
 
     notes = models.TextField(blank=True, default='')
 

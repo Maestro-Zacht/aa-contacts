@@ -8,6 +8,7 @@ from allianceauth.eveonline.models import EveCharacter, EveAllianceInfo
 
 from .models import AllianceContact, AllianceToken
 from .tasks import update_alliance_contacts
+from .forms import AllianceContactForm
 
 
 @login_required
@@ -82,3 +83,25 @@ def update_alliance(request):
 
     messages.success(request, 'Alliance contacts are being updated.')
     return redirect('aa_contacts:index')
+
+
+@login_required
+@permission_required('aa_contacts.view_contacts')
+def update_contact(request, contact_pk: int):
+    contact = get_object_or_404(AllianceContact, pk=contact_pk)
+
+    if request.method == 'POST':
+        form = AllianceContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{contact.contact_name} contact updated successfully')
+            return redirect('aa_contacts:contacts')
+    else:
+        form = AllianceContactForm(instance=contact)
+
+    context = {
+        'form': form,
+        'contact': contact,
+    }
+
+    return render(request, 'aa_contacts/edit_contact.html', context=context)

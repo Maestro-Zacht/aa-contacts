@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, group
 
 from django.db import transaction
 from django.utils import timezone
@@ -13,7 +13,15 @@ logger = get_extension_logger(__name__)
 
 
 @shared_task
+def load_contact_name(contact_pk: int):
+    contact = AllianceContact.objects.get(pk=contact_pk)
+    contact.contact_name
+
+
+@shared_task
 def update_alliance_contacts(alliance_id: int):
+    contact_to_load = []
+
     try:
         alliance = EveAllianceInfo.objects.get(alliance_id=alliance_id)
     except EveAllianceInfo.DoesNotExist:
@@ -80,7 +88,6 @@ def update_alliance_contacts(alliance_id: int):
 
         for contact_id, contact_data in contact_ids.items():
             contact, _ = alliance_contacts.update_or_create(
-                alliance=alliance,
                 contact_id=contact_id,
                 defaults={
                     'contact_type': contact_data['contact_type'],
@@ -92,10 +99,12 @@ def update_alliance_contacts(alliance_id: int):
             if contact_data['label_ids'] is not None:
                 contact.labels.set([labels[label_id] for label_id in contact_data['label_ids']])
 
-            contact.contact_name
+            contact_to_load.append(contact.pk)
 
         alliance_token.last_update = timezone.now()
         alliance_token.save()
+
+    group(load_contact_name.si(pk) for pk in contact_to_load).delay()
 
 
 @shared_task

@@ -88,6 +88,7 @@ def update_alliance_contacts(alliance_id: int):
 
         for contact_id, contact_data in contact_ids.items():
             contact, _ = alliance_contacts.update_or_create(
+                alliance=alliance,
                 contact_id=contact_id,
                 defaults={
                     'contact_type': contact_data['contact_type'],

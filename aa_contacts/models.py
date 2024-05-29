@@ -5,15 +5,15 @@ from allianceauth.eveonline.models import EveAllianceInfo, EveCharacter, EveCorp
 from esi.models import Token
 
 
-class AllianceTokenQueryset(models.QuerySet):
+class ContactTokenQueryset(models.QuerySet):
     def with_valid_tokens(self):
         valid_tokens = Token.objects.all().require_valid()
         return self.filter(token__in=valid_tokens)
 
 
-class AllianceTokenManager(models.Manager):
+class ContactTokenManager(models.Manager):
     def get_queryset(self):
-        return AllianceTokenQueryset(self.model, using=self._db)
+        return ContactTokenQueryset(self.model, using=self._db)
 
     def with_valid_tokens(self):
         return self.get_queryset().with_valid_tokens()
@@ -24,24 +24,23 @@ class General(models.Model):
         managed = False
         default_permissions = ()
         permissions = (
-            ('view_contacts', 'Can view alliance contacts'),
+            ('manage_alliance_contacts', 'Can manage alliance contacts'),
+            ('manage_corporation_contacts', 'Can manage corporation contacts'),
+            ('view_alliance_notes', 'Can view notes on alliance contacts'),
+            ('view_corporation_notes', 'Can view notes on corporation contacts'),
         )
 
 
-class AllianceContactLabel(models.Model):
-    alliance = models.ForeignKey(EveAllianceInfo, on_delete=models.RESTRICT, related_name='contact_labels')
+class ContactLabel(models.Model):
     label_id = models.BigIntegerField()
     label_name = models.CharField(max_length=255)
 
     class Meta:
+        abstract = True
         default_permissions = ()
 
-    def __str__(self):
-        return f"{self.alliance} - {self.label_name}"
 
-
-class AllianceContact(models.Model):
-    alliance = models.ForeignKey(EveAllianceInfo, on_delete=models.RESTRICT, related_name='contacts')
+class Contact(models.Model):
     contact_id = models.BigIntegerField()
 
     class ContactTypeOptions(models.TextChoices):
@@ -52,16 +51,11 @@ class AllianceContact(models.Model):
 
     contact_type = models.CharField(max_length=11, choices=ContactTypeOptions.choices)
     standing = models.FloatField()
-
-    labels = models.ManyToManyField(AllianceContactLabel, blank=True, related_name='contacts')
-
     notes = models.TextField(blank=True, default='')
 
     class Meta:
+        abstract = True
         default_permissions = ()
-
-    def __str__(self):
-        return f"{self.alliance} - {self.contact_name}"
 
     @property
     def image_src(self) -> str:
@@ -108,13 +102,64 @@ class AllianceContact(models.Model):
         return res
 
 
-class AllianceToken(models.Model):
-    alliance = models.OneToOneField(EveAllianceInfo, on_delete=models.RESTRICT, related_name='+')
+class ContactToken(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='+')
 
     last_update = models.DateTimeField(default=timezone.now)
 
-    objects = AllianceTokenManager()
+    objects = ContactTokenManager()
+
+    class Meta:
+        abstract = True
+        default_permissions = ()
+
+
+class AllianceContactLabel(ContactLabel):
+    alliance = models.ForeignKey(EveAllianceInfo, on_delete=models.RESTRICT, related_name='contact_labels')
 
     class Meta:
         default_permissions = ()
+
+    def __str__(self):
+        return f"{self.alliance} - {self.label_name}"
+
+
+class AllianceContact(Contact):
+    alliance = models.ForeignKey(EveAllianceInfo, on_delete=models.RESTRICT, related_name='contacts')
+
+    labels = models.ManyToManyField(AllianceContactLabel, blank=True, related_name='contacts')
+
+    class Meta:
+        default_permissions = ()
+
+    def __str__(self):
+        return f"{self.alliance} - {self.contact_name}"
+
+
+class AllianceToken(ContactToken):
+    alliance = models.OneToOneField(EveAllianceInfo, on_delete=models.RESTRICT, related_name='+')
+
+    class Meta:
+        default_permissions = ()
+
+
+class CorporationContactLabel(ContactLabel):
+    corporation = models.ForeignKey(EveCorporationInfo, on_delete=models.RESTRICT, related_name='contact_labels')
+
+    class Meta:
+        default_permissions = ()
+
+    def __str__(self):
+        return f"{self.corporation} - {self.label_name}"
+
+
+class CorporationContact(Contact):
+    corporation = models.ForeignKey(EveCorporationInfo, on_delete=models.RESTRICT, related_name='contacts')
+
+    labels = models.ManyToManyField(CorporationContactLabel, blank=True, related_name='contacts')
+
+    class Meta:
+        default_permissions = ()
+
+    def __str__(self):
+        return f"{self.corporation} - {self.contact_name}"

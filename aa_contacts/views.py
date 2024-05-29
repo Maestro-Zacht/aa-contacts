@@ -17,7 +17,6 @@ def index(request):
 
 
 @login_required
-@permission_required('aa_contacts.view_contacts')
 def contacts(request):
     try:
         alliance = request.user.profile.main_character.alliance
@@ -42,7 +41,6 @@ def contacts(request):
 
 
 @login_required
-@permission_required('aa_contacts.view_contacts')
 @token_required(scopes=['esi-alliances.read_contacts.v1'])
 def add_token(request, token: Token):
     char = get_object_or_404(EveCharacter, character_id=token.character_id)
@@ -68,7 +66,6 @@ def add_token(request, token: Token):
 
 
 @login_required
-@permission_required('aa_contacts.view_contacts')
 def update_alliance(request):
     try:
         alliance = request.user.profile.main_character.alliance
@@ -86,7 +83,6 @@ def update_alliance(request):
 
 
 @login_required
-@permission_required('aa_contacts.view_contacts')
 def update_contact(request, contact_pk: int):
     contact = get_object_or_404(AllianceContact, pk=contact_pk)
 

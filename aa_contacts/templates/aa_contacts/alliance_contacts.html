@@ -35,38 +35,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-aa">
-                        <thead>
-                            <tr>
-                                <th>Contact</th>
-                                <th>Contact Type</th>
-                                <th>Labels</th>
-                                <th>Standing</th>
-                                {% if perms.aa_contacts.view_alliance_notes %}<th>Notes</th>{% endif %}
-                                {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}<th></th>{% endif %}
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {% for contact in contacts %}
-                                <tr>
-                                    <td>
-                                        <img src="{{ contact.image_src }}" class="rounded me-2">
-                                        {{ contact.contact_name }}
-                                    </td>
-                                    <td>{{ contact.contact_type }}</td>
-                                    <td>{% for label in contact.labels.all %}{{ label.label_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-                                    <td>{{ contact.standing }}</td>
-                                    {% if perms.aa_contacts.view_alliance_notes %}<td>{{ contact.notes }}</td>{% endif %}
-                                    {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}
-                                        <td><a href="{% url "aa_contacts:update_alliance_contact" contact.pk %}" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-pen"></i></a></td>
-                                    {% endif %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                {% include "aa_contacts/contact_list.html" with view_notes=perms.aa_contacts.view_alliance_notes edit_notes=perms.aa_contacts.manage_alliance_contacts contacts=contacts edit_url="aa_contacts:update_alliance_contact" %}
             </div>
         </div>
     </div>
@@ -79,7 +48,7 @@
 
 {% block extra_script %}
     $(document).ready(function() {
-        $('.table').DataTable({
+        $('#contact-table').DataTable({
             {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}
             columnDefs: [
                 { targets: [5], sortable: false, searchable: false }

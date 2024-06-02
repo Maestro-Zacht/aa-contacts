@@ -5,7 +5,7 @@
 {% block aacontactscontent %}
     {% include "framework/header/page-header.html" with title="AllianceAuth Contacts" %}
     <div class="col-12">
-        <div class="card">
+        <div class="card mb-3">
             <h3 class="card-title text-center mb-2">Alliances</h3>
             <div class="card-body">
                 <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
@@ -26,6 +26,39 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-center align-items-center h-100">
                                         <a href="{% url "aa_contacts:add_alliance_token" %}" class="btn btn-primary">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <h3 class="card-title text-center mb-2">Corporations</h3>
+            <div class="card-body">
+                <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
+                    {% for corporation in corporation_tokens %}
+                        <div class="col">
+                            <div class="card text-center">
+                                <img src="{{ corporation.corporation.logo_url_256 }}" class="card-img-top">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">{{ corporation.corporation.corporation_name }}</h5>
+                                    <a href="{% url "aa_contacts:corporation_contacts" corporation.corporation_id %}" class="btn btn-primary">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if perms.aa_contacts.manage_corporation_contacts %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-center align-items-center h-100">
+                                        <a href="{% url "aa_contacts:add_corporation_token" %}" class="btn btn-primary">
                                             <i class="fa-solid fa-plus"></i>
                                         </a>
                                     </div>

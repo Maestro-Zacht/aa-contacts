@@ -184,3 +184,14 @@ class CorporationToken(ContactToken):
 
     class Meta:
         default_permissions = ()
+
+    @classmethod
+    def visible_for(cls, user):
+        if user.is_superuser:
+            return cls.objects.all()
+
+        return cls.objects.filter(
+            corporation__corporation_id__in=CharacterOwnership.objects
+            .filter(user=user)
+            .values('character__corporation_id')
+        )

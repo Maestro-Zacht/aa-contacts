@@ -7,37 +7,31 @@
 {% endblock %}
 
 {% block aacontactscontent %}
-    <h1 class="page-header text-center">{{ alliance.alliance_name }} Contacts</h1>
-    <div class="row justify-content-center my-3">
-        <div class="col-6">
-            <div class="card-group">
-                <div class="card text-center">
-                    <div class="card-header">
-                        Last update
-                    </div>
-                    <div class="card-body">
-                        {% if token is None %}
-                            <p>No token present</p>
-                        {% else %}
+    {% include "framework/header/page-header.html" with title=alliance.alliance_name|add:" Contacts" %}
+    {% if perms.aa_contacts.manage_alliance_contacts %}
+        <div class="row justify-content-center my-3">
+            <div class="col-6">
+                <div class="card-group">
+                    <div class="card text-center">
+                        <div class="card-header">
+                            Last update
+                        </div>
+                        <div class="card-body">
                             <p>{{ token.last_update|date:"d/m/Y G:i e" }}</p>
-                        {% endif %}
+                        </div>
                     </div>
-                </div>
-                <div class="card text-center">
-                    <div class="card-header">
-                        Actions
-                    </div>
-                    <div class="card-body">
-                        {% if token is None %}
-                            <a class="btn btn-primary" href="{% url "aa_contacts:add_token" %}">Add token</a>
-                        {% else %}
-                            <a class="btn btn-primary" href="{% url "aa_contacts:update_alliance" %}">Update</a>
-                        {% endif %}
+                    <div class="card text-center">
+                        <div class="card-header">
+                            Actions
+                        </div>
+                        <div class="card-body">
+                            <a class="btn btn-primary" href="{% url "aa_contacts:update_alliance" alliance.pk %}">Update</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    {% endif %}
     <div class="col-12">
         <div class="card">
             <div class="card-body">
@@ -49,8 +43,8 @@
                                 <th>Contact Type</th>
                                 <th>Labels</th>
                                 <th>Standing</th>
-                                <th>Notes</th>
-                                <th></th>
+                                {% if perms.aa_contacts.view_alliance_notes %}<th>Notes</th>{% endif %}
+                                {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}<th></th>{% endif %}
                             </tr>
                         </thead>
 
@@ -64,10 +58,13 @@
                                     <td>{{ contact.contact_type }}</td>
                                     <td>{% for label in contact.labels.all %}{{ label.label_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                                     <td>{{ contact.standing }}</td>
-                                    <td>{{ contact.notes }}</td>
-                                    <td><a href="{% url "aa_contacts:update_contact" contact.pk %}" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-pen"></i></a></td>
+                                    {% if perms.aa_contacts.view_alliance_notes %}<td>{{ contact.notes }}</td>{% endif %}
+                                    {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}
+                                        <td><a href="{% url "aa_contacts:update_alliance_contact" contact.pk %}" class="btn btn-outline-success btn-sm"><i class="fa-solid fa-pen"></i></a></td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -83,9 +80,11 @@
 {% block extra_script %}
     $(document).ready(function() {
         $('.table').DataTable({
+            {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}
             columnDefs: [
                 { targets: [5], sortable: false, searchable: false }
             ],
+            {% endif %}
             "pageLength": 50,
             filterDropDown: {
                 bootstrap: true,

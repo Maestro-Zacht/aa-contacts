@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCharacter, EveCorporationInfo, EveFactionInfo
 from esi.models import Token
 
@@ -142,6 +143,17 @@ class AllianceToken(ContactToken):
     class Meta:
         default_permissions = ()
 
+    @classmethod
+    def visible_for(cls, user):
+        if user.is_superuser:
+            return cls.objects.all()
+
+        return cls.objects.filter(
+            alliance__alliance_id__in=CharacterOwnership.objects
+            .filter(user=user)
+            .values('character__alliance_id')
+        )
+
 
 class CorporationContactLabel(ContactLabel):
     corporation = models.ForeignKey(EveCorporationInfo, on_delete=models.RESTRICT, related_name='contact_labels')
@@ -158,8 +170,17 @@ class CorporationContact(Contact):
 
     labels = models.ManyToManyField(CorporationContactLabel, blank=True, related_name='contacts')
 
+    is_watched = models.BooleanField(null=True, blank=True, default=None)
+
     class Meta:
         default_permissions = ()
 
     def __str__(self):
         return f"{self.corporation} - {self.contact_name}"
+
+
+class CorporationToken(ContactToken):
+    corporation = models.OneToOneField(EveCorporationInfo, on_delete=models.RESTRICT, related_name='+')
+
+    class Meta:
+        default_permissions = ()

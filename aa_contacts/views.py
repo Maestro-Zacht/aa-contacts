@@ -13,36 +13,39 @@ from .forms import AllianceContactForm
 
 @login_required
 def index(request):
-    return redirect('aa_contacts:contacts')
+    context = {
+        'alliance_tokens': AllianceToken.visible_for(request.user),
+    }
+    return render(request, 'aa_contacts/index.html', context=context)
 
 
 @login_required
-def contacts(request):
+def alliance_contacts(request, alliance_pk: int):
     try:
-        alliance = request.user.profile.main_character.alliance
-    except EveAllianceInfo.DoesNotExist:
-        alliance = None
+        token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
+    except AllianceToken.DoesNotExist:
+        messages.error(request, 'You do not have the permissions for viewing this alliance contacts.')
+        return redirect('aa_contacts:index')
 
     contacts = (
         AllianceContact.objects
-        .filter(alliance=alliance)
+        .filter(alliance=token.alliance)
         .prefetch_related('labels')
     )
-
-    token = AllianceToken.objects.filter(alliance=alliance).first()
 
     context = {
         'contacts': contacts,
         'token': token,
-        'alliance': alliance,
+        'alliance': token.alliance,
     }
 
-    return render(request, 'aa_contacts/contacts.html', context=context)
+    return render(request, 'aa_contacts/alliance_contacts.html', context=context)
 
 
 @login_required
+@permission_required('aa_contacts.manage_alliance_contacts')
 @token_required(scopes=['esi-alliances.read_contacts.v1'])
-def add_token(request, token: Token):
+def add_alliance_token(request, token: Token):
     char = get_object_or_404(EveCharacter, character_id=token.character_id)
 
     if char.alliance_id is None:
@@ -66,24 +69,23 @@ def add_token(request, token: Token):
 
 
 @login_required
-def update_alliance(request):
+@permission_required('aa_contacts.manage_alliance_contacts')
+def update_alliance(request, alliance_pk: int):
     try:
-        alliance = request.user.profile.main_character.alliance
-    except EveAllianceInfo.DoesNotExist:
-        alliance = None
-
-    if alliance is None:
-        messages.error(request, 'You need to be in an alliance to update alliance contacts.')
+        token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
+    except AllianceToken.DoesNotExist:
+        messages.error(request, 'You do not have the permissions for viewing this alliance contacts.')
         return redirect('aa_contacts:index')
 
-    update_alliance_contacts.delay(alliance.alliance_id)
+    update_alliance_contacts.delay(token.alliance.alliance_id)
 
     messages.success(request, 'Alliance contacts are being updated.')
-    return redirect('aa_contacts:index')
+    return redirect('aa_contacts:alliance_contacts', alliance_pk)
 
 
 @login_required
-def update_contact(request, contact_pk: int):
+@permission_required(['aa_contacts.manage_alliance_contacts', 'aa_contacts.view_alliance_notes'])
+def update_alliance_contact(request, contact_pk: int):
     contact = get_object_or_404(AllianceContact, pk=contact_pk)
 
     if request.method == 'POST':
@@ -91,7 +93,7 @@ def update_contact(request, contact_pk: int):
         if form.is_valid():
             form.save()
             messages.success(request, f'{contact.contact_name} contact updated successfully')
-            return redirect('aa_contacts:contacts')
+            return redirect('aa_contacts:alliance_contacts', contact.alliance_id)
     else:
         form = AllianceContactForm(instance=contact)
 

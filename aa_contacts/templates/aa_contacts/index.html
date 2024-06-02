@@ -1,0 +1,40 @@
+{% extends 'aa_contacts/base.html' %}
+
+{% block page_title %}AA Contacts{% endblock page_title %}
+
+{% block aacontactscontent %}
+    {% include "framework/header/page-header.html" with title="AllianceAuth Contacts" %}
+    <div class="col-12">
+        <div class="card">
+            <h3 class="card-title text-center mb-2">Alliances</h3>
+            <div class="card-body">
+                <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
+                    {% for alliance in alliance_tokens %}
+                        <div class="col">
+                            <div class="card text-center">
+                                <img src="{{ alliance.alliance.logo_url_256 }}" class="card-img-top">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">{{ alliance.alliance.alliance_name }}</h5>
+                                    <a href="{% url "aa_contacts:alliance_contacts" alliance.alliance_id %}" class="btn btn-primary">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if perms.aa_contacts.manage_alliance_contacts %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-center align-items-center h-100">
+                                        <a href="{% url "aa_contacts:add_alliance_token" %}" class="btn btn-primary">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock aacontactscontent %}

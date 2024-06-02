@@ -45,34 +45,3 @@
     {% include "bundles/datatables-js-bs5.html" %}
     {% include "bundles/filterdropdown-js.html" %}
 {% endblock extra_javascript %}
-
-{% block extra_script %}
-    $(document).ready(function() {
-        $('#contact-table').DataTable({
-            {% if perms.aa_contacts.manage_alliance_contacts and perms.aa_contacts.view_alliance_notes %}
-            columnDefs: [
-                { targets: [5], sortable: false, searchable: false }
-            ],
-            {% endif %}
-            "pageLength": 50,
-            filterDropDown: {
-                bootstrap: true,
-                bootstrap_version: 5,
-                columns: [
-                    {
-                        idx: 1,
-                        title: 'Contact Type'
-                    },
-                    {
-                        idx: 2,
-                        title: 'Labels'
-                    },
-                    {
-                        idx: 3,
-                        title: 'Standing'
-                    }
-                ]
-            }
-        });
-    });
-{% endblock extra_script %}

@@ -11,13 +11,17 @@
                 <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
                     {% for alliance in alliance_tokens %}
                         <div class="col">
-                            <div class="card text-center">
+                            <div class="card h-100 text-center">
                                 <img src="{{ alliance.alliance.logo_url_256 }}" class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">{{ alliance.alliance.alliance_name }}</h5>
                                     <a href="{% url "aa_contacts:alliance_contacts" alliance.alliance_id %}" class="btn btn-primary">View</a>
                                 </div>
                             </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center">
+                            <h5>No alliances available</h5>
                         </div>
                     {% endfor %}
                     {% if perms.aa_contacts.manage_alliance_contacts %}
@@ -44,13 +48,17 @@
                 <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
                     {% for corporation in corporation_tokens %}
                         <div class="col">
-                            <div class="card text-center">
+                            <div class="card h-100 text-center">
                                 <img src="{{ corporation.corporation.logo_url_256 }}" class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">{{ corporation.corporation.corporation_name }}</h5>
                                     <a href="{% url "aa_contacts:corporation_contacts" corporation.corporation_id %}" class="btn btn-primary">View</a>
                                 </div>
                             </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center">
+                            <h5>No corporations available</h5>
                         </div>
                     {% endfor %}
                     {% if perms.aa_contacts.manage_corporation_contacts %}

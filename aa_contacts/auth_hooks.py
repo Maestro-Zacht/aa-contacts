@@ -17,3 +17,8 @@ def register_menu():
 @hooks.register('url_hook')
 def register_urls():
     return UrlHook(urls, 'aa_contacts', 'aa_contacts/')
+
+
+@hooks.register('charlink')
+def register_charlink_hook():
+    return 'aa_contacts.charlink_hook.app_import'

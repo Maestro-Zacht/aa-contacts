@@ -89,6 +89,8 @@ INSTALLED_APPS += [
 
     "debug_toolbar",
     'taskmonitor',
+
+    'charlink',
 ]
 
 #######################################

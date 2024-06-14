@@ -21,4 +21,4 @@ def register_urls():
 
 @hooks.register('charlink')
 def register_charlink_hook():
-    return 'aa_contacts.charlink_hook.app_import'
+    return 'aa_contacts.charlink_hook'

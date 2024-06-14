@@ -89,6 +89,8 @@ INSTALLED_APPS += [
 
     "debug_toolbar",
     'taskmonitor',
+
+    'charlink',
 ]
 
 #######################################
@@ -101,7 +103,7 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
-CELERYBEAT_SCHEDULE['aa_contacts_update_all_alliances_contacts'] = {
-    'task': 'aa_contacts.tasks.update_all_alliances_contacts',
+CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
+    'task': 'aa_contacts.tasks.update_all_contacts',
     'schedule': crontab(minute='24'),
 }

@@ -5,3 +5,5 @@ coverage
 factory_boy
 django-debug-toolbar
 aa-taskmonitor
+
+aa-charlink

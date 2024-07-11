@@ -1,5 +1,6 @@
 from django.db.models import Exists, OuterRef
 from django.contrib.auth.models import Permission
+from django.contrib import messages
 
 from allianceauth.eveonline.models import EveCharacter, EveAllianceInfo, EveCorporationInfo
 
@@ -15,23 +16,27 @@ alliance_scopes = ['esi-alliances.read_contacts.v1']
 corporation_scopes = ['esi-corporations.read_contacts.v1']
 
 
-def _alliance_login(token: Token):
+def _alliance_login(request, token: Token):
     char = EveCharacter.objects.get(character_id=token.character_id)
 
-    assert char.alliance_id is not None
+    if char.alliance_id is None:
+        messages.error(request, 'Character is not in an alliance')
+        assert False
 
     try:
         alliance = char.alliance
     except EveAllianceInfo.DoesNotExist:
         alliance = EveAllianceInfo.objects.create_alliance(char.alliance_id)
 
-    assert not AllianceToken.objects.filter(alliance=alliance).exists()
+    if AllianceToken.objects.filter(alliance=alliance).exists():
+        messages.error(request, f'{alliance} already has a token')
+        assert False
 
     AllianceToken.objects.create(alliance=alliance, token=token)
     update_alliance_contacts.delay(alliance.alliance_id)
 
 
-def _corporation_login(token: Token):
+def _corporation_login(request, token: Token):
     char = EveCharacter.objects.get(character_id=token.character_id)
 
     try:
@@ -39,7 +44,9 @@ def _corporation_login(token: Token):
     except EveCorporationInfo.DoesNotExist:
         corporation = EveCorporationInfo.objects.create_corporation(char.corporation_id)
 
-    assert not CorporationToken.objects.filter(corporation=corporation).exists()
+    if CorporationToken.objects.filter(corporation=corporation).exists():
+        messages.error(request, f'{corporation} already has a token')
+        assert False
 
     CorporationToken.objects.create(corporation=corporation, token=token)
     update_corporation_contacts.delay(corporation.corporation_id)

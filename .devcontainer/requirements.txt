@@ -7,3 +7,4 @@ django-debug-toolbar
 aa-taskmonitor
 
 aa-charlink
+allianceauth-securegroups

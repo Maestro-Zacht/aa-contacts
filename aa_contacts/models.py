@@ -218,6 +218,28 @@ class BaseFilter(models.Model):
     def __str__(self):
         return f"{self.name}: {self.description}"
 
+    def process_filter(self, user: User):  # Single User Pass Fail system
+        raise NotImplementedError("Please Create a filter!")
+
+    def audit_filter(self, users):  # Bulk check system that also advises the user with simple messages
+        raise NotImplementedError("Please Create an audit function!")
+
+
+class StandingFilter(BaseFilter):
+    standing = models.FloatField()
+
+    class ComparisonOptions(models.TextChoices):
+        GREATER_THAN = '>'
+        GREATER_OR_EQUAL = '>='
+        LESS_THAN = '<'
+        LESS_OR_EQUAL = '<='
+        EQUAL = '='
+
+    comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
+
+    class Meta:
+        abstract = True
+
     def _base_query(self, user_filter):
         raise NotImplementedError
 
@@ -240,18 +262,7 @@ class BaseFilter(models.Model):
         return output
 
 
-class CorpStandingFilter(BaseFilter):
-    standing = models.FloatField()
-
-    class ComparisonOptions(models.TextChoices):
-        GREATER_THAN = '>'
-        GREATER_OR_EQUAL = '>='
-        LESS_THAN = '<'
-        LESS_OR_EQUAL = '<='
-        EQUAL = '='
-
-    comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
-
+class CorpStandingFilter(StandingFilter):
     corporations = models.ManyToManyField(EveCorporationInfo, related_name='corp_standing_filters', help_text="The corporations that have set the standings")
 
     class Meta:
@@ -302,18 +313,7 @@ class CorpStandingFilter(BaseFilter):
         )
 
 
-class AllianceStandingFilter(BaseFilter):
-    standing = models.FloatField()
-
-    class ComparisonOptions(models.TextChoices):
-        GREATER_THAN = '>'
-        GREATER_OR_EQUAL = '>='
-        LESS_THAN = '<'
-        LESS_OR_EQUAL = '<='
-        EQUAL = '='
-
-    comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
-
+class AllianceStandingFilter(StandingFilter):
     alliances = models.ManyToManyField(EveAllianceInfo, related_name='alliance_standing_filters', help_text="The alliances that have set the standings")
 
     class Meta:

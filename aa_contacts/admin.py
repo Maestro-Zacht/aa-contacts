@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 
-from .models import AllianceContact, CorporationContact, CorpStandingFilter, AllianceStandingFilter
+from .models import AllianceContact, CorporationContact, StandingFilter
 
 
 @admin.register(AllianceContact)
@@ -16,14 +16,9 @@ class CorporationContactAdmin(admin.ModelAdmin):
     readonly_fields = ('corporation', 'contact_type', 'standing', 'labels', )
 
 
-class CorpStandingFilterAdmin(admin.ModelAdmin):
-    raw_id_fields = ('corporations', )
-
-
-class AllianceStandingFilterAdmin(admin.ModelAdmin):
-    raw_id_fields = ('alliances', )
+class StandingFilterAdmin(admin.ModelAdmin):
+    raw_id_fields = ('corporations', 'alliances', )
 
 
 if apps.is_installed('securegroups'):
-    admin.site.register(CorpStandingFilter, CorpStandingFilterAdmin)
-    admin.site.register(AllianceStandingFilter, AllianceStandingFilterAdmin)
+    admin.site.register(StandingFilter, StandingFilterAdmin)

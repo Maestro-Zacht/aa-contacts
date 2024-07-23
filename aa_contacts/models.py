@@ -23,6 +23,45 @@ class ContactTokenManager(models.Manager):
         return self.get_queryset().with_valid_tokens()
 
 
+class ContactQueryset(models.QuerySet):
+    def about(self, user_filter):
+        user_characters = (
+            CharacterOwnership.objects
+            .filter(user=user_filter)
+            .values('character__character_id')
+        )
+        user_alliances = (
+            CharacterOwnership.objects
+            .filter(user=user_filter, character__alliance_id__isnull=False)
+            .values('character__alliance_id')
+        )
+        user_corps = (
+            CharacterOwnership.objects
+            .filter(user=user_filter)
+            .values('character__corporation_id')
+        )
+        user_factions = (
+            CharacterOwnership.objects
+            .filter(user=user_filter, character__faction_id__isnull=False)
+            .values('character__faction_id')
+        )
+
+        return self.filter(
+            models.Q(contact_id__in=user_characters, contact_type=Contact.ContactTypeOptions.CHARACTER) |
+            models.Q(contact_id__in=user_corps, contact_type=Contact.ContactTypeOptions.CORPORATION) |
+            models.Q(contact_id__in=user_alliances, contact_type=Contact.ContactTypeOptions.ALLIANCE) |
+            models.Q(contact_id__in=user_factions, contact_type=Contact.ContactTypeOptions.FACTION)
+        )
+
+
+class ContactManager(models.Manager):
+    def get_queryset(self):
+        return ContactQueryset(self.model, using=self._db)
+
+    def about(self, user_filter):
+        return self.get_queryset().about(user_filter)
+
+
 class General(models.Model):
     class Meta:
         managed = False
@@ -56,6 +95,8 @@ class Contact(models.Model):
     contact_type = models.CharField(max_length=11, choices=ContactTypeOptions.choices)
     standing = models.FloatField()
     notes = models.TextField(blank=True, default='')
+
+    objects = ContactManager()
 
     class Meta:
         abstract = True
@@ -226,8 +267,6 @@ class BaseFilter(models.Model):
 
 
 class StandingFilter(BaseFilter):
-    standing = models.FloatField()
-
     class ComparisonOptions(models.TextChoices):
         GREATER_THAN = '>'
         GREATER_OR_EQUAL = '>='
@@ -236,19 +275,68 @@ class StandingFilter(BaseFilter):
         EQUAL = '='
 
     comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
+    standing = models.FloatField()
+
+    corporations = models.ManyToManyField(EveCorporationInfo, blank=True, related_name='corp_standing_filters', help_text="The corporations that have set the standings")
+    alliances = models.ManyToManyField(EveAllianceInfo, blank=True, related_name='alliance_standing_filters', help_text="The alliances that have set the standings")
 
     class Meta:
-        abstract = True
+        verbose_name = "Smart Filter: User Standings"
+        verbose_name_plural = verbose_name
+        default_permissions = ()
 
-    def _base_query(self, user_filter):
-        raise NotImplementedError
+    def _corp_query(self, user_filter):
+        if self.comparison == self.ComparisonOptions.GREATER_THAN:
+            standing_lookup = models.Q(standing__gt=self.standing)
+        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
+            standing_lookup = models.Q(standing__gte=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_THAN:
+            standing_lookup = models.Q(standing__lt=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
+            standing_lookup = models.Q(standing__lte=self.standing)
+        else:
+            standing_lookup = models.Q(standing=self.standing)
+
+        return (
+            CorporationContact.objects
+            .about(user_filter)
+            .filter(
+                standing_lookup,
+                corporation__in=self.corporations.all()
+            )
+        )
+
+    def _alliance_query(self, user_filter):
+        if self.comparison == self.ComparisonOptions.GREATER_THAN:
+            standing_lookup = models.Q(standing__gt=self.standing)
+        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
+            standing_lookup = models.Q(standing__gte=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_THAN:
+            standing_lookup = models.Q(standing__lt=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
+            standing_lookup = models.Q(standing__lte=self.standing)
+        else:
+            standing_lookup = models.Q(standing=self.standing)
+
+        return (
+            AllianceContact.objects
+            .about(user_filter)
+            .filter(
+                standing_lookup,
+                alliance__in=self.alliances.all()
+            )
+        )
 
     def process_filter(self, user: User) -> bool:
-        return self._base_query(user).exists()
+        return self._alliance_query(user).exists() or self._corp_query(user).exists()
 
     def audit_filter(self, users):
         annotated_query = users.annotate(
-            check=models.Exists(self._base_query(models.OuterRef(models.OuterRef('pk'))))
+            check=models.Exists(
+                self._corp_query(models.OuterRef(models.OuterRef('pk')))
+            ) | models.Exists(
+                self._alliance_query(models.OuterRef(models.OuterRef('pk')))
+            )
         )
 
         output = defaultdict(lambda: {"message": "", "check": False})
@@ -260,105 +348,3 @@ class StandingFilter(BaseFilter):
             }
 
         return output
-
-
-class CorpStandingFilter(StandingFilter):
-    corporations = models.ManyToManyField(EveCorporationInfo, related_name='corp_standing_filters', help_text="The corporations that have set the standings")
-
-    class Meta:
-        verbose_name = "Smart Filter: Corp Standings"
-        verbose_name_plural = verbose_name
-        default_permissions = ()
-
-    def _base_query(self, user_filter):
-        user_characters = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__character_id')
-        )
-        user_alliances = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__alliance_id__isnull=False)
-            .values('character__alliance_id')
-        )
-        user_corps = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__corporation_id')
-        )
-        user_factions = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__faction_id__isnull=False)
-            .values('character__faction_id')
-        )
-
-        if self.comparison == self.ComparisonOptions.GREATER_THAN:
-            standing_lookup = models.Q(standing__gt=self.standing)
-        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
-            standing_lookup = models.Q(standing__gte=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_THAN:
-            standing_lookup = models.Q(standing__lt=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
-            standing_lookup = models.Q(standing__lte=self.standing)
-        else:
-            standing_lookup = models.Q(standing=self.standing)
-
-        return CorporationContact.objects.filter(
-            models.Q(contact_id__in=user_characters, contact_type=Contact.ContactTypeOptions.CHARACTER) |
-            models.Q(contact_id__in=user_corps, contact_type=Contact.ContactTypeOptions.CORPORATION) |
-            models.Q(contact_id__in=user_alliances, contact_type=Contact.ContactTypeOptions.ALLIANCE) |
-            models.Q(contact_id__in=user_factions, contact_type=Contact.ContactTypeOptions.FACTION),
-            standing_lookup,
-            corporation__in=self.corporations.all()
-        )
-
-
-class AllianceStandingFilter(StandingFilter):
-    alliances = models.ManyToManyField(EveAllianceInfo, related_name='alliance_standing_filters', help_text="The alliances that have set the standings")
-
-    class Meta:
-        verbose_name = "Smart Filter: Alliance Standings"
-        verbose_name_plural = verbose_name
-        default_permissions = ()
-
-    def _base_query(self, user_filter):
-        user_characters = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__character_id')
-        )
-        user_alliances = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__alliance_id__isnull=False)
-            .values('character__alliance_id')
-        )
-        user_corps = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__corporation_id')
-        )
-        user_factions = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__faction_id__isnull=False)
-            .values('character__faction_id')
-        )
-
-        if self.comparison == self.ComparisonOptions.GREATER_THAN:
-            standing_lookup = models.Q(standing__gt=self.standing)
-        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
-            standing_lookup = models.Q(standing__gte=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_THAN:
-            standing_lookup = models.Q(standing__lt=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
-            standing_lookup = models.Q(standing__lte=self.standing)
-        else:
-            standing_lookup = models.Q(standing=self.standing)
-
-        return AllianceContact.objects.filter(
-            models.Q(contact_id__in=user_characters, contact_type=Contact.ContactTypeOptions.CHARACTER) |
-            models.Q(contact_id__in=user_corps, contact_type=Contact.ContactTypeOptions.CORPORATION) |
-            models.Q(contact_id__in=user_alliances, contact_type=Contact.ContactTypeOptions.ALLIANCE) |
-            models.Q(contact_id__in=user_factions, contact_type=Contact.ContactTypeOptions.FACTION),
-            standing_lookup,
-            alliance__in=self.alliances.all()
-        )

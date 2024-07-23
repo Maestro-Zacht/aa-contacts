@@ -2,7 +2,7 @@ from allianceauth import hooks
 from allianceauth.services.hooks import UrlHook, MenuItemHook
 
 from . import urls
-from .models import CorpStandingFilter, AllianceStandingFilter
+from .models import StandingFilter
 
 
 class AAContactsHook(MenuItemHook):
@@ -27,4 +27,4 @@ def register_charlink_hook():
 
 @hooks.register('secure_group_filters')
 def filters():
-    return [CorpStandingFilter, AllianceStandingFilter]
+    return [StandingFilter]

@@ -91,6 +91,7 @@ INSTALLED_APPS += [
     'taskmonitor',
 
     'charlink',
+    'securegroups',
 ]
 
 #######################################

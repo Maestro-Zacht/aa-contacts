@@ -16,6 +16,12 @@ The index page shows all the alliances and corporations that have been added and
 
 In every alliance or corporation view, the user can see the contacts and their standings. If it has the right [permissions](#permissions), the user can see and edit notes or trigger a manual update of the contacts.
 
+### Secure Groups integration
+
+If the [Secure Groups](https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups) plugin is installed, a new smart filter will appear in the admin panel of AA Contacts. It allows to filter users by the standings a corporation or alliance has set for them or their groups.
+
+Note: when multiple corporations/alliances are set, the logic applies an OR condition, i.e. it is sufficient that at least 1 corp/alliance meets the requirement for the filter to pass. If you want to apply an AND condition, you need to create one filter per condition and put them together in the smart group.
+
 ## Installation
 
 1. Install the package. If you have a traditional installation, run the following command in your terminal:
@@ -58,7 +64,7 @@ In every alliance or corporation view, the user can see the contacts and their s
     }
     ```
 
-5. Restart Supervisor if you are on a traditional install or the docker stack if you are on docker. 
+5. Restart Supervisor if you are on a traditional install or the docker stack if you are on docker.
 
 ## Permissions
 

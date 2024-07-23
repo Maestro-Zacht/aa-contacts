@@ -1,5 +1,8 @@
+from collections import defaultdict
+
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCharacter, EveCorporationInfo, EveFactionInfo
@@ -18,6 +21,45 @@ class ContactTokenManager(models.Manager):
 
     def with_valid_tokens(self):
         return self.get_queryset().with_valid_tokens()
+
+
+class ContactQueryset(models.QuerySet):
+    def about(self, user_filter):
+        user_characters = (
+            CharacterOwnership.objects
+            .filter(user=user_filter)
+            .values('character__character_id')
+        )
+        user_alliances = (
+            CharacterOwnership.objects
+            .filter(user=user_filter, character__alliance_id__isnull=False)
+            .values('character__alliance_id')
+        )
+        user_corps = (
+            CharacterOwnership.objects
+            .filter(user=user_filter)
+            .values('character__corporation_id')
+        )
+        user_factions = (
+            CharacterOwnership.objects
+            .filter(user=user_filter, character__faction_id__isnull=False)
+            .values('character__faction_id')
+        )
+
+        return self.filter(
+            models.Q(contact_id__in=user_characters, contact_type=Contact.ContactTypeOptions.CHARACTER) |
+            models.Q(contact_id__in=user_corps, contact_type=Contact.ContactTypeOptions.CORPORATION) |
+            models.Q(contact_id__in=user_alliances, contact_type=Contact.ContactTypeOptions.ALLIANCE) |
+            models.Q(contact_id__in=user_factions, contact_type=Contact.ContactTypeOptions.FACTION)
+        )
+
+
+class ContactManager(models.Manager):
+    def get_queryset(self):
+        return ContactQueryset(self.model, using=self._db)
+
+    def about(self, user_filter):
+        return self.get_queryset().about(user_filter)
 
 
 class General(models.Model):
@@ -53,6 +95,8 @@ class Contact(models.Model):
     contact_type = models.CharField(max_length=11, choices=ContactTypeOptions.choices)
     standing = models.FloatField()
     notes = models.TextField(blank=True, default='')
+
+    objects = ContactManager()
 
     class Meta:
         abstract = True
@@ -143,6 +187,9 @@ class AllianceToken(ContactToken):
     class Meta:
         default_permissions = ()
 
+    def __str__(self) -> str:
+        return f"{self.alliance} Token"
+
     @classmethod
     def visible_for(cls, user):
         if user.is_superuser:
@@ -185,6 +232,9 @@ class CorporationToken(ContactToken):
     class Meta:
         default_permissions = ()
 
+    def __str__(self) -> str:
+        return f"{self.corporation} Token"
+
     @classmethod
     def visible_for(cls, user):
         if user.is_superuser:
@@ -195,3 +245,96 @@ class CorporationToken(ContactToken):
             .filter(user=user)
             .values('character__corporation_id')
         )
+
+# Secure Groups integration
+
+
+class BaseFilter(models.Model):
+    name = models.CharField(max_length=500)  # This is the filters name shown to the admin
+    description = models.CharField(max_length=500)  # this is what is shown to the user
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.name}: {self.description}"
+
+    def process_filter(self, user: User):  # Single User Pass Fail system
+        raise NotImplementedError("Please Create a filter!")
+
+    def audit_filter(self, users):  # Bulk check system that also advises the user with simple messages
+        raise NotImplementedError("Please Create an audit function!")
+
+
+class StandingFilter(BaseFilter):
+    class ComparisonOptions(models.TextChoices):
+        GREATER_THAN = '>'
+        GREATER_OR_EQUAL = '>='
+        LESS_THAN = '<'
+        LESS_OR_EQUAL = '<='
+        EQUAL = '='
+
+    comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
+    standing = models.FloatField()
+
+    corporations = models.ManyToManyField(EveCorporationInfo, blank=True, related_name='corp_standing_filters', help_text="The corporations that have set the standings")
+    alliances = models.ManyToManyField(EveAllianceInfo, blank=True, related_name='alliance_standing_filters', help_text="The alliances that have set the standings")
+
+    class Meta:
+        verbose_name = "Smart Filter: User Standings"
+        verbose_name_plural = verbose_name
+        default_permissions = ()
+
+    def _standing_lookup(self):
+        if self.comparison == self.ComparisonOptions.GREATER_THAN:
+            return models.Q(standing__gt=self.standing)
+        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
+            return models.Q(standing__gte=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_THAN:
+            return models.Q(standing__lt=self.standing)
+        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
+            return models.Q(standing__lte=self.standing)
+        else:
+            return models.Q(standing=self.standing)
+
+    def _corp_query(self, user_filter):
+        return (
+            CorporationContact.objects
+            .about(user_filter)
+            .filter(
+                self._standing_lookup(),
+                corporation__in=self.corporations.all()
+            )
+        )
+
+    def _alliance_query(self, user_filter):
+        return (
+            AllianceContact.objects
+            .about(user_filter)
+            .filter(
+                self._standing_lookup(),
+                alliance__in=self.alliances.all()
+            )
+        )
+
+    def process_filter(self, user: User) -> bool:
+        return self._alliance_query(user).exists() or self._corp_query(user).exists()
+
+    def audit_filter(self, users):
+        annotated_query = users.annotate(
+            check=models.Exists(
+                self._corp_query(models.OuterRef(models.OuterRef('pk')))
+            ) | models.Exists(
+                self._alliance_query(models.OuterRef(models.OuterRef('pk')))
+            )
+        )
+
+        output = defaultdict(lambda: {"message": "", "check": False})
+
+        for user in annotated_query.values('pk', 'check'):
+            output[user['pk']] = {
+                "message": "User has a character, corporation, alliance or faction that meets the filter" if user['check'] else "User does not meet the filter",
+                "check": user['check']
+            }
+
+        return output

@@ -285,44 +285,34 @@ class StandingFilter(BaseFilter):
         verbose_name_plural = verbose_name
         default_permissions = ()
 
-    def _corp_query(self, user_filter):
+    def _standing_lookup(self):
         if self.comparison == self.ComparisonOptions.GREATER_THAN:
-            standing_lookup = models.Q(standing__gt=self.standing)
+            return models.Q(standing__gt=self.standing)
         elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
-            standing_lookup = models.Q(standing__gte=self.standing)
+            return models.Q(standing__gte=self.standing)
         elif self.comparison == self.ComparisonOptions.LESS_THAN:
-            standing_lookup = models.Q(standing__lt=self.standing)
+            return models.Q(standing__lt=self.standing)
         elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
-            standing_lookup = models.Q(standing__lte=self.standing)
+            return models.Q(standing__lte=self.standing)
         else:
-            standing_lookup = models.Q(standing=self.standing)
+            return models.Q(standing=self.standing)
 
+    def _corp_query(self, user_filter):
         return (
             CorporationContact.objects
             .about(user_filter)
             .filter(
-                standing_lookup,
+                self._standing_lookup(),
                 corporation__in=self.corporations.all()
             )
         )
 
     def _alliance_query(self, user_filter):
-        if self.comparison == self.ComparisonOptions.GREATER_THAN:
-            standing_lookup = models.Q(standing__gt=self.standing)
-        elif self.comparison == self.ComparisonOptions.GREATER_OR_EQUAL:
-            standing_lookup = models.Q(standing__gte=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_THAN:
-            standing_lookup = models.Q(standing__lt=self.standing)
-        elif self.comparison == self.ComparisonOptions.LESS_OR_EQUAL:
-            standing_lookup = models.Q(standing__lte=self.standing)
-        else:
-            standing_lookup = models.Q(standing=self.standing)
-
         return (
             AllianceContact.objects
             .about(user_filter)
             .filter(
-                standing_lookup,
+                self._standing_lookup(),
                 alliance__in=self.alliances.all()
             )
         )

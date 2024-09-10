@@ -1,12 +1,13 @@
 {% extends 'aa_contacts/base.html' %}
+{% load i18n %}
 
-{% block page_title %}AA Contacts{% endblock page_title %}
+{% block page_title %}{% translate "AA Contacts" %}{% endblock page_title %}
 
 {% block aacontactscontent %}
     {% include "framework/header/page-header.html" with title="AllianceAuth Contacts" %}
     <div class="col-12">
         <div class="card mb-3">
-            <h3 class="card-title text-center mb-2">Alliances</h3>
+            <h3 class="card-title text-center mb-2">{% translate "Alliances" %}</h3>
             <div class="card-body">
                 <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
                     {% for alliance in alliance_tokens %}
@@ -15,13 +16,13 @@
                                 <img src="{{ alliance.alliance.logo_url_256 }}" class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">{{ alliance.alliance.alliance_name }}</h5>
-                                    <a href="{% url "aa_contacts:alliance_contacts" alliance.alliance_id %}" class="btn btn-primary">View</a>
+                                    <a href="{% url "aa_contacts:alliance_contacts" alliance.alliance_id %}" class="btn btn-primary">{% translate "View" %}</a>
                                 </div>
                             </div>
                         </div>
                     {% empty %}
                         <div class="col-12 text-center">
-                            <h5>No alliances available</h5>
+                            <h5>{% translate "No alliances available" %}</h5>
                         </div>
                     {% endfor %}
                     {% if perms.aa_contacts.manage_alliance_contacts %}
@@ -43,7 +44,7 @@
     </div>
     <div class="col-12">
         <div class="card">
-            <h3 class="card-title text-center mb-2">Corporations</h3>
+            <h3 class="card-title text-center mb-2">{% translate "Corporations" %}</h3>
             <div class="card-body">
                 <div class="row row-cols-md-2 row-cols-lg-4 row-cols-xl-6 justify-content-evenly">
                     {% for corporation in corporation_tokens %}
@@ -52,13 +53,13 @@
                                 <img src="{{ corporation.corporation.logo_url_256 }}" class="card-img-top">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">{{ corporation.corporation.corporation_name }}</h5>
-                                    <a href="{% url "aa_contacts:corporation_contacts" corporation.corporation_id %}" class="btn btn-primary">View</a>
+                                    <a href="{% url "aa_contacts:corporation_contacts" corporation.corporation_id %}" class="btn btn-primary">{% translate "View" %}</a>
                                 </div>
                             </div>
                         </div>
                     {% empty %}
                         <div class="col-12 text-center">
-                            <h5>No corporations available</h5>
+                            <h5>{% translate "No corporations available" %}</h5>
                         </div>
                     {% endfor %}
                     {% if perms.aa_contacts.manage_corporation_contacts %}

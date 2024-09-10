@@ -1,12 +1,14 @@
+{% load i18n %}
+
 <div class="table-responsive">
     <table id="contact-table" class="table table-aa">
         <thead>
             <tr>
-                <th>Contact</th>
-                <th>Contact Type</th>
-                <th>Labels</th>
-                <th>Standing</th>
-                {% if view_notes %}<th>Notes</th>{% endif %}
+                <th>{% translate "Contact" %}</th>
+                <th>{% translate "Contact Type" %}</th>
+                <th>{% translate "Labels" %}</th>
+                <th>{% translate "Standing" %}</th>
+                {% if view_notes %}<th>{% translate "Notes" %}</th>{% endif %}
                 {% if view_notes and edit_notes %}<th></th>{% endif %}
             </tr>
         </thead>

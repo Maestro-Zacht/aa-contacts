@@ -24,25 +24,24 @@ class ContactTokenManager(models.Manager):
 
 
 class ContactQueryset(models.QuerySet):
-    def about(self, user_filter):
-        user_characters = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__character_id')
-        )
+    def about(self, user_filter, only_main):
+        base_query = CharacterOwnership.objects.filter(user=user_filter)
+        if only_main:
+            base_query = base_query.filter(character=models.F('user__profile__main_character'))
+
+        user_characters = base_query.values('character__character_id')
+
         user_alliances = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__alliance_id__isnull=False)
+            base_query
+            .filter(character__alliance_id__isnull=False)
             .values('character__alliance_id')
         )
-        user_corps = (
-            CharacterOwnership.objects
-            .filter(user=user_filter)
-            .values('character__corporation_id')
-        )
+
+        user_corps = base_query.values('character__corporation_id')
+
         user_factions = (
-            CharacterOwnership.objects
-            .filter(user=user_filter, character__faction_id__isnull=False)
+            base_query
+            .filter(character__faction_id__isnull=False)
             .values('character__faction_id')
         )
 
@@ -58,8 +57,8 @@ class ContactManager(models.Manager):
     def get_queryset(self):
         return ContactQueryset(self.model, using=self._db)
 
-    def about(self, user_filter):
-        return self.get_queryset().about(user_filter)
+    def about(self, user_filter, only_main):
+        return self.get_queryset().about(user_filter, only_main)
 
 
 class General(models.Model):
@@ -277,6 +276,14 @@ class StandingFilter(BaseFilter):
     comparison = models.CharField(max_length=2, choices=ComparisonOptions.choices)
     standing = models.FloatField()
 
+    class CheckTypeOptions(models.TextChoices):
+        AT_LEAST_ONE_CHARACTER = 'any'
+        ALL_CHARACTERS = 'all'
+        NO_CHARACTER = 'no'
+
+    check_type = models.CharField(max_length=3, choices=CheckTypeOptions.choices, default=CheckTypeOptions.AT_LEAST_ONE_CHARACTER)
+    only_main = models.BooleanField(default=False, help_text="Only consider the main character of the user")
+
     corporations = models.ManyToManyField(EveCorporationInfo, blank=True, related_name='corp_standing_filters', help_text="The corporations that have set the standings")
     alliances = models.ManyToManyField(EveAllianceInfo, blank=True, related_name='alliance_standing_filters', help_text="The alliances that have set the standings")
 
@@ -285,6 +292,7 @@ class StandingFilter(BaseFilter):
         verbose_name_plural = verbose_name
         default_permissions = ()
 
+    @property
     def _standing_lookup(self):
         if self.comparison == self.ComparisonOptions.GREATER_THAN:
             return models.Q(standing__gt=self.standing)
@@ -300,9 +308,9 @@ class StandingFilter(BaseFilter):
     def _corp_query(self, user_filter):
         return (
             CorporationContact.objects
-            .about(user_filter)
+            .about(user_filter, self.only_main)
             .filter(
-                self._standing_lookup(),
+                self._standing_lookup,
                 corporation__in=self.corporations.all()
             )
         )
@@ -310,31 +318,122 @@ class StandingFilter(BaseFilter):
     def _alliance_query(self, user_filter):
         return (
             AllianceContact.objects
-            .about(user_filter)
+            .about(user_filter, self.only_main)
             .filter(
-                self._standing_lookup(),
+                self._standing_lookup,
                 alliance__in=self.alliances.all()
             )
         )
 
     def process_filter(self, user: User) -> bool:
-        return self._alliance_query(user).exists() or self._corp_query(user).exists()
+        return self.audit_filter(User.objects.filter(pk=user.pk))[user.pk]['check']
 
     def audit_filter(self, users):
-        annotated_query = users.annotate(
-            check=models.Exists(
-                self._corp_query(models.OuterRef(models.OuterRef('pk')))
-            ) | models.Exists(
-                self._alliance_query(models.OuterRef(models.OuterRef('pk')))
-            )
-        )
-
         output = defaultdict(lambda: {"message": "", "check": False})
 
-        for user in annotated_query.values('pk', 'check'):
-            output[user['pk']] = {
-                "message": "User has a character, corporation, alliance or faction that meets the filter" if user['check'] else "User does not meet the filter",
-                "check": user['check']
-            }
+        if self.check_type == StandingFilter.CheckTypeOptions.AT_LEAST_ONE_CHARACTER:
+            annotated_query = users.annotate(
+                check=models.Exists(
+                    self._corp_query(models.OuterRef(models.OuterRef('pk')))
+                ) | models.Exists(
+                    self._alliance_query(models.OuterRef(models.OuterRef('pk')))
+                )
+            )
+
+            for user in annotated_query.values('pk', 'check'):
+                output[user['pk']] = {
+                    "message": "User has a character, corporation, alliance or faction that meets the filter" if user['check'] else "User does not meet the filter",
+                    "check": user['check']
+                }
+        elif self.check_type == StandingFilter.CheckTypeOptions.NO_CHARACTER:
+            annotated_query = users.annotate(
+                check=~(
+                    models.Exists(
+                        self._corp_query(models.OuterRef(models.OuterRef('pk')))
+                    ) | models.Exists(
+                        self._alliance_query(models.OuterRef(models.OuterRef('pk')))
+                    )
+                )
+            )
+
+            for user in annotated_query.values('pk', 'check'):
+                output[user['pk']] = {
+                    "message": "User has all characters that meet the filter" if user['check'] else "User does not meet the filter",
+                    "check": user['check']
+                }
+        else:
+            base_query = CharacterOwnership.objects.filter(user=models.OuterRef('pk'))
+            if self.only_main:
+                base_query = base_query.filter(character=models.F('user__profile__main_character'))
+
+            chars = (
+                base_query.filter(
+                    models.Exists(
+                        CorporationContact.objects.filter(
+                            self._standing_lookup,
+                            models.Q(
+                                contact_id=models.OuterRef('character__character_id'),
+                                contact_type=Contact.ContactTypeOptions.CHARACTER
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__corporation_id'),
+                                contact_type=Contact.ContactTypeOptions.CORPORATION
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__alliance_id'),
+                                contact_type=Contact.ContactTypeOptions.ALLIANCE
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__faction_id'),
+                                contact_type=Contact.ContactTypeOptions.FACTION
+                            ),
+                            corporation__in=self.corporations.all()
+                        )
+                    ) |
+                    models.Exists(
+                        AllianceContact.objects.filter(
+                            self._standing_lookup,
+                            models.Q(
+                                contact_id=models.OuterRef('character__character_id'),
+                                contact_type=Contact.ContactTypeOptions.CHARACTER
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__corporation_id'),
+                                contact_type=Contact.ContactTypeOptions.CORPORATION
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__alliance_id'),
+                                contact_type=Contact.ContactTypeOptions.ALLIANCE
+                            ) |
+                            models.Q(
+                                contact_id=models.OuterRef('character__faction_id'),
+                                contact_type=Contact.ContactTypeOptions.FACTION
+                            ),
+                            alliance__in=self.alliances.all()
+                        )
+                    )
+                )
+                .values('user')
+                .annotate(count=models.Count('*'))
+                .values('count')
+            )
+
+            annotated_query = (
+                users
+                .annotate(count_valid=models.Subquery(chars))
+                .annotate(total=models.Subquery(
+                    base_query
+                    .values('user')
+                    .annotate(count=models.Count('*'))
+                    .values('count')
+                ))
+            )
+
+            for user in annotated_query.values('pk', 'count_valid', 'total'):
+                passed = user['count_valid'] == user['total']
+                output[user['pk']] = {
+                    "message": "User has all characters that meet the filter" if passed else "User does not meet the filter",
+                    "check": passed
+                }
 
         return output

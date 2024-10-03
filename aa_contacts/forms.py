@@ -10,9 +10,9 @@ class AllianceContactForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields:
+        for field, data in self.fields.items():
             if field != 'notes':
-                self.fields[field].disabled = True
+                data.disabled = True
 
 
 class CorporationContactForm(forms.ModelForm):
@@ -22,6 +22,6 @@ class CorporationContactForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields:
+        for field, data in self.fields.items():
             if field != 'notes':
-                self.fields[field].disabled = True
+                data.disabled = True

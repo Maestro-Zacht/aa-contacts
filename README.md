@@ -2,6 +2,8 @@
 
 [![PyPI](https://img.shields.io/pypi/v/aa-contacts)](https://pypi.org/project/aa-contacts/)
 
+![EvE Partner](https://raw.githubusercontent.com/Maestro-Zacht/aa-contacts/c55d148e8b017642b691ea2badf6f11cdb5ab3db/docs/images/eve_partner.jpg)
+
 This is a plugin for [AllianceAuth](https://gitlab.com/allianceauth/allianceauth) that lets alliances and corporations track and manage their contacts (i.e. standings).
 
 ## Overview
@@ -18,9 +20,20 @@ In every alliance or corporation view, the user can see the contacts and their s
 
 ### Secure Groups integration
 
-If the [Secure Groups](https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups) plugin is installed, a new smart filter will appear in the admin panel of AA Contacts. It allows to filter users by the standings a corporation or alliance has set for them or their groups.
+If the [Secure Groups](https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups) plugin is installed, a new smart filter will appear in the admin panel of AA Contacts. It allows to filter users by the standings a corporation or alliance has set for them or their alliance/corporation.
 
 Note: when multiple corporations/alliances are set, the logic applies an OR condition, i.e. it is sufficient that at least 1 corp/alliance meets the requirement for the filter to pass. If you want to apply an AND condition, you need to create one filter per condition and put them together in the smart group.
+
+#### Fields
+
+- **comparison**: comparison operator to use
+- **standings**: the standing to compare against
+- **check type**:
+  - at least one character: if at least one character passes the filter, the user passes the filter
+  - all characters: all characters have to pass the filter for the user to pass the filter
+  - no character: opposite of all characters
+- **only main**: consider only the main character
+- **corporations** and **alliances**: groups that have set the standings
 
 ## Installation
 

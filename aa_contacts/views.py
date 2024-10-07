@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from esi.decorators import token_required
 from esi.models import Token
@@ -25,7 +26,7 @@ def alliance_contacts(request, alliance_pk: int):
     try:
         token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
     except AllianceToken.DoesNotExist:
-        messages.error(request, 'You do not have the permissions for viewing this alliance contacts.')
+        messages.error(request, _('You do not have the permissions for viewing this alliance contacts.'))
         return redirect('aa_contacts:index')
 
     contacts = (
@@ -48,7 +49,7 @@ def corporation_contacts(request, corporation_pk: int):
     try:
         token = CorporationToken.visible_for(request.user).select_related('corporation').get(corporation_id=corporation_pk)
     except CorporationToken.DoesNotExist:
-        messages.error(request, 'You do not have the permissions for viewing this corporation contacts.')
+        messages.error(request, _('You do not have the permissions for viewing this corporation contacts.'))
         return redirect('aa_contacts:index')
 
     contacts = (
@@ -73,7 +74,7 @@ def add_alliance_token(request, token: Token):
     char = get_object_or_404(EveCharacter, character_id=token.character_id)
 
     if char.alliance_id is None:
-        messages.error(request, 'You need to be in an alliance to add alliance contacts.')
+        messages.error(request, _('You need to be in an alliance to add alliance contacts.'))
         return redirect('aa_contacts:index')
 
     try:
@@ -82,13 +83,13 @@ def add_alliance_token(request, token: Token):
         alliance = EveAllianceInfo.objects.create_alliance(char.alliance_id)
 
     if AllianceToken.objects.filter(alliance=alliance).exists():
-        messages.error(request, 'Alliance contacts for your alliance are already being tracked.')
+        messages.error(request, _('Alliance contacts for your alliance are already being tracked.'))
         return redirect('aa_contacts:index')
 
     AllianceToken.objects.create(alliance=alliance, token=token)
     update_alliance_contacts.delay(alliance.alliance_id)
 
-    messages.success(request, 'Alliance contacts are now being tracked.')
+    messages.success(request, _('Alliance contacts are now being tracked.'))
     return redirect('aa_contacts:index')
 
 
@@ -104,13 +105,13 @@ def add_corporation_token(request, token: Token):
         corporation = EveCorporationInfo.objects.create_corporation(char.corporation_id)
 
     if CorporationToken.objects.filter(corporation=corporation).exists():
-        messages.error(request, 'Corporation contacts for your corporation are already being tracked.')
+        messages.error(request, _('Corporation contacts for your corporation are already being tracked.'))
         return redirect('aa_contacts:index')
 
     CorporationToken.objects.create(corporation=corporation, token=token)
     update_corporation_contacts.delay(corporation.corporation_id)
 
-    messages.success(request, 'Corporation contacts are now being tracked.')
+    messages.success(request, _('Corporation contacts are now being tracked.'))
     return redirect('aa_contacts:index')
 
 
@@ -120,12 +121,12 @@ def update_alliance(request, alliance_pk: int):
     try:
         token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
     except AllianceToken.DoesNotExist:
-        messages.error(request, 'You do not have the permissions for viewing this alliance contacts.')
+        messages.error(request, _('You do not have the permissions for viewing this alliance contacts.'))
         return redirect('aa_contacts:index')
 
     update_alliance_contacts.delay(token.alliance.alliance_id)
 
-    messages.success(request, 'Alliance contacts are being updated.')
+    messages.success(request, _('Alliance contacts are being updated.'))
     return redirect('aa_contacts:alliance_contacts', alliance_pk)
 
 
@@ -135,12 +136,12 @@ def update_corporation(request, corporation_pk: int):
     try:
         token = CorporationToken.visible_for(request.user).select_related('corporation').get(corporation_id=corporation_pk)
     except CorporationToken.DoesNotExist:
-        messages.error(request, 'You do not have the permissions for viewing this corporation contacts.')
+        messages.error(request, _('You do not have the permissions for viewing this corporation contacts.'))
         return redirect('aa_contacts:index')
 
     update_corporation_contacts.delay(token.corporation.corporation_id)
 
-    messages.success(request, 'Corporation contacts are being updated.')
+    messages.success(request, _('Corporation contacts are being updated.'))
     return redirect('aa_contacts:corporation_contacts', corporation_pk)
 
 
@@ -153,7 +154,7 @@ def update_alliance_contact(request, contact_pk: int):
         form = AllianceContactForm(request.POST, instance=contact)
         if form.is_valid():
             form.save()
-            messages.success(request, f'{contact.contact_name} contact updated successfully')
+            messages.success(request, _('%(contact)s contact updated successfully') % {'contact': contact.contact_name})
             return redirect('aa_contacts:alliance_contacts', contact.alliance_id)
     else:
         form = AllianceContactForm(instance=contact)
@@ -175,7 +176,7 @@ def update_corporation_contact(request, contact_pk: int):
         form = CorporationContactForm(request.POST, instance=contact)
         if form.is_valid():
             form.save()
-            messages.success(request, f'{contact.contact_name} contact updated successfully')
+            messages.success(request, _('%(contact)s contact updated successfully') % {'contact': contact.contact_name})
             return redirect('aa_contacts:corporation_contacts', contact.corporation_id)
     else:
         form = CorporationContactForm(instance=contact)

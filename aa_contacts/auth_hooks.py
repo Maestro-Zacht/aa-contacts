@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from allianceauth import hooks
 from allianceauth.services.hooks import UrlHook, MenuItemHook
 
@@ -7,7 +9,7 @@ from .models import StandingFilter
 
 class AAContactsHook(MenuItemHook):
     def __init__(self):
-        super().__init__("Contacts", "fas fa-address-book", "aa_contacts:index", navactive=['aa_contacts:'])
+        super().__init__(_("Contacts"), "fas fa-address-book", "aa_contacts:index", navactive=['aa_contacts:'])
 
 
 @hooks.register('menu_item_hook')

@@ -1,6 +1,7 @@
 from django.db.models import Exists, OuterRef
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+from django.utils.translation import gettext as _, gettext_lazy as gl
 
 from allianceauth.eveonline.models import EveCharacter, EveAllianceInfo, EveCorporationInfo
 
@@ -20,7 +21,7 @@ def _alliance_login(request, token: Token):
     char = EveCharacter.objects.get(character_id=token.character_id)
 
     if char.alliance_id is None:
-        messages.error(request, 'Character is not in an alliance')
+        messages.error(request, _('Character is not in an alliance'))
         assert False
 
     try:
@@ -29,7 +30,7 @@ def _alliance_login(request, token: Token):
         alliance = EveAllianceInfo.objects.create_alliance(char.alliance_id)
 
     if AllianceToken.objects.filter(alliance=alliance).exists():
-        messages.error(request, f'{alliance} already has a token')
+        messages.error(request, _('%(alliance)s has a token already') % {'alliance': alliance})
         assert False
 
     AllianceToken.objects.create(alliance=alliance, token=token)
@@ -45,7 +46,7 @@ def _corporation_login(request, token: Token):
         corporation = EveCorporationInfo.objects.create_corporation(char.corporation_id)
 
     if CorporationToken.objects.filter(corporation=corporation).exists():
-        messages.error(request, f'{corporation} already has a token')
+        messages.error(request, _('%(corporation)s has a token already') % {'corporation': corporation})
         assert False
 
     CorporationToken.objects.create(corporation=corporation, token=token)
@@ -76,7 +77,7 @@ app_import = AppImport(
         LoginImport(
             app_label="aa_contacts",
             unique_id="alliance",
-            field_label="Alliance Contacts",
+            field_label=gl("Alliance Contacts"),
             add_character=_alliance_login,
             scopes=alliance_scopes,
             check_permissions=lambda user: user.has_perm('aa_contacts.manage_alliance_contacts'),
@@ -91,7 +92,7 @@ app_import = AppImport(
         LoginImport(
             app_label="aa_contacts",
             unique_id="corporation",
-            field_label="Corporation Contacts",
+            field_label=gl("Corporation Contacts"),
             add_character=_corporation_login,
             scopes=corporation_scopes,
             check_permissions=lambda user: user.has_perm('aa_contacts.manage_corporation_contacts'),

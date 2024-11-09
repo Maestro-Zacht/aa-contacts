@@ -117,10 +117,23 @@ class TestUpdateAllianceContacts(TestCase):
 
         self.contact_data[str(self.alliance.alliance_id)] = []
 
+        contact = AllianceContact.objects.first()
+        contact.notes = "Test"
+        contact.save()
+
         update_alliance_contacts(self.alliance.alliance_id)
 
         self.assertEqual(AllianceContact.objects.count(), 1)
-        self.assertEqual(AllianceContact.objects.first().standing, 0.0)
+        contact.refresh_from_db()
+        self.assertEqual(contact.standing, 0.0)
+        self.assertEqual(contact.labels.count(), 0)
+
+        contact.notes = ""
+        contact.save()
+
+        update_alliance_contacts(self.alliance.alliance_id)
+
+        self.assertEqual(AllianceContact.objects.count(), 0)
 
 
 class TestUpdateCorporationContacts(TestCase):
@@ -232,7 +245,20 @@ class TestUpdateCorporationContacts(TestCase):
 
         self.contact_data[str(self.corporation.corporation_id)] = []
 
+        contact = CorporationContact.objects.first()
+        contact.notes = "Test"
+        contact.save()
+
         update_corporation_contacts(self.corporation.corporation_id)
 
         self.assertEqual(CorporationContact.objects.count(), 1)
-        self.assertEqual(CorporationContact.objects.first().standing, 0.0)
+        contact.refresh_from_db()
+        self.assertEqual(contact.standing, 0.0)
+        self.assertEqual(contact.labels.count(), 0)
+
+        contact.notes = ""
+        contact.save()
+
+        update_corporation_contacts(self.corporation.corporation_id)
+
+        self.assertEqual(CorporationContact.objects.count(), 0)

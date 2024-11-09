@@ -85,11 +85,17 @@ def update_alliance_contacts(alliance_id: int):
 
             labels[label_id] = label
 
-        AllianceContact.objects.filter(
+        missing_contacts = AllianceContact.objects.filter(
             alliance=alliance
         ).exclude(
             contact_id__in=contact_ids.keys()
-        ).update(standing=0.0)
+        )
+
+        missing_contacts.filter(notes='').delete()
+        AllianceContact.labels.through.objects.filter(
+            alliancecontact_id__in=missing_contacts.values('pk')
+        ).delete()
+        missing_contacts.update(standing=0.0)
 
         for contact_id, contact_data in contact_ids.items():
             contact, _ = AllianceContact.objects.update_or_create(
@@ -174,11 +180,17 @@ def update_corporation_contacts(corporation_id: int):
 
             labels[label_id] = label
 
-        CorporationContact.objects.filter(
+        missing_contacts = CorporationContact.objects.filter(
             corporation=corporation
         ).exclude(
             contact_id__in=contact_ids.keys()
-        ).update(standing=0.0)
+        )
+
+        missing_contacts.filter(notes='').delete()
+        CorporationContact.labels.through.objects.filter(
+            corporationcontact_id__in=missing_contacts.values('pk')
+        ).delete()
+        missing_contacts.update(standing=0.0)
 
         for contact_id, contact_data in contact_ids.items():
             contact, _ = CorporationContact.objects.update_or_create(

@@ -51,6 +51,7 @@ services:
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ./aa_mariadb.cnf:/etc/mysql/conf.d/aa_mariadb.cnf
     environment:
       - MYSQL_ROOT_PASSWORD=${AA_DB_ROOT_PASSWORD?err}
       - MARIADB_MYSQL_LOCALHOST_USER=1
@@ -78,7 +79,7 @@ services:
       - "redis-data:/data"
       - ./redis_healthcheck.sh:/usr/local/bin/redis_healthcheck.sh
     healthcheck:
-      test: [ "CMD", "bash", "/usr/local/bin/redis_healthcheck.sh" ]
+      test: [ "CMD", "/usr/local/bin/redis_healthcheck.sh" ]
     logging:
       driver: "json-file"
       options:

@@ -79,6 +79,13 @@ Note: when multiple corporations/alliances are set, the logic applies an OR cond
 
 5. Restart Supervisor if you are on a traditional install or the docker stack if you are on docker.
 
+## Settings
+
+| Setting                   | Description                                                                                                                                                    | Default |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `AA_CONTACTS_TASK_JITTER` | Maximum number of seconds for a task to be delayed. This helps to prevent tasks from running at the same time and spreads the load both on workers and on ESI. | `300`   |
+
+
 ## Permissions
 
 | Permission                    | Description                                                                                                           |

@@ -9,6 +9,7 @@ from django.utils import timezone
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
 
+from .app_settings import TASK_JITTER
 from .models import AllianceContact, AllianceContactLabel, AllianceToken, CorporationToken, CorporationContact, CorporationContactLabel
 from .provider import esi
 
@@ -220,7 +221,7 @@ def update_corporation_contacts(corporation_id: int):
 @shared_task
 def update_all_alliances_contacts():
     group(
-        update_alliance_contacts.si(alliance_token.alliance.alliance_id).set(countdown=randint(0, 600))
+        update_alliance_contacts.si(alliance_token.alliance.alliance_id).set(countdown=randint(0, TASK_JITTER))
         for alliance_token in AllianceToken.objects.with_valid_tokens().select_related('alliance')
     ).delay()
 
@@ -228,7 +229,7 @@ def update_all_alliances_contacts():
 @shared_task
 def update_all_corporations_contacts():
     group(
-        update_corporation_contacts.si(corporation_token.corporation.corporation_id).set(countdown=randint(0, 600))
+        update_corporation_contacts.si(corporation_token.corporation.corporation_id).set(countdown=randint(0, TASK_JITTER))
         for corporation_token in CorporationToken.objects.with_valid_tokens().select_related('corporation')
     ).delay()
 

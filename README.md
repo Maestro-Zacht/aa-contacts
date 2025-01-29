@@ -73,7 +73,8 @@ Note: when multiple corporations/alliances are set, the logic applies an OR cond
     # AA Contacts
     CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
         'task': 'aa_contacts.tasks.update_all_contacts',
-        'schedule': crontab(minute='24'),
+        'schedule': crontab(minute='0'),
+        'apply_offset': True,
     }
     ```
 
@@ -84,7 +85,6 @@ Note: when multiple corporations/alliances are set, the logic applies an OR cond
 | Setting                   | Description                                                                                                                                                    | Default |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `AA_CONTACTS_TASK_JITTER` | Maximum number of seconds for a task to be delayed. This helps to prevent tasks from running at the same time and spreads the load both on workers and on ESI. | `300`   |
-
 
 ## Permissions
 

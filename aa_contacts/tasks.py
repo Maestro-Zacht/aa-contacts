@@ -119,7 +119,9 @@ def update_alliance_contacts(alliance_id: int):
         alliance_token.last_update = timezone.now()
         alliance_token.save()
 
-    group(load_alliance_contact_name.si(pk) for pk in contacts_to_load).delay()
+    contacts_to_load = AllianceContact.filter_missing_contact_name(contacts_to_load)
+    if len(contacts_to_load) > 0:
+        group(load_alliance_contact_name.si(pk) for pk in contacts_to_load).delay()
 
 
 @shared_task(base=QueueOnce, once={'graceful': True})
@@ -215,7 +217,9 @@ def update_corporation_contacts(corporation_id: int):
         corporation_token.last_update = timezone.now()
         corporation_token.save()
 
-    group(load_corporation_contact_name.si(pk) for pk in contacts_to_load).delay()
+    contacts_to_load = CorporationContact.filter_missing_contact_name(contacts_to_load)
+    if len(contacts_to_load) > 0:
+        group(load_corporation_contact_name.si(pk) for pk in contacts_to_load).delay()
 
 
 @shared_task

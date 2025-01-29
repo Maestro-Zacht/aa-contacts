@@ -145,6 +145,37 @@ class Contact(models.Model):
 
         return res
 
+    @classmethod
+    def filter_missing_contact_name(cls, pk_list: list[int]) -> list[int]:
+        return list(
+            cls.objects
+            .filter(pk__in=pk_list)
+            .annotate(
+                has_object=models.Case(
+                    models.When(
+                        contact_type=cls.ContactTypeOptions.CHARACTER,
+                        then=models.Exists(EveCharacter.objects.filter(character_id=models.OuterRef('contact_id')))
+                    ),
+                    models.When(
+                        contact_type=cls.ContactTypeOptions.CORPORATION,
+                        then=models.Exists(EveCorporationInfo.objects.filter(corporation_id=models.OuterRef('contact_id')))
+                    ),
+                    models.When(
+                        contact_type=cls.ContactTypeOptions.ALLIANCE,
+                        then=models.Exists(EveAllianceInfo.objects.filter(alliance_id=models.OuterRef('contact_id')))
+                    ),
+                    models.When(
+                        contact_type=cls.ContactTypeOptions.FACTION,
+                        then=models.Exists(EveFactionInfo.objects.filter(faction_id=models.OuterRef('contact_id')))
+                    ),
+                    default=models.Value(False),
+                    output_field=models.BooleanField()
+                )
+            )
+            .filter(has_object=False)
+            .values_list('pk', flat=True)
+        )
+
 
 class ContactToken(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='+')

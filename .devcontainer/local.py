@@ -108,3 +108,5 @@ CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
     'task': 'aa_contacts.tasks.update_all_contacts',
     'schedule': crontab(minute='24'),
 }
+
+# AA_CONTACTS_TASK_JITTER = 60

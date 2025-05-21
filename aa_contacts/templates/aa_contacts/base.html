@@ -1,5 +1,15 @@
 {% extends 'allianceauth/base-bs5.html' %}
 
+{% load i18n %}
+
+{% block page_title %}
+    {% translate "Contacts" %}
+{% endblock %}
+
+{% block header_nav_brand %}
+    {% translate "Contacts" %}
+{% endblock header_nav_brand %}
+
 {% block content %}
     <div class="row">
         {% block aacontactscontent %}{% endblock aacontactscontent %}

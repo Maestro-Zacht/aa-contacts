@@ -19,7 +19,7 @@ def register_menu():
 
 @hooks.register('url_hook')
 def register_urls():
-    return UrlHook(urls, 'aa_contacts', 'aa_contacts/')
+    return UrlHook(urls, 'aa_contacts', r'^contacts/')
 
 
 @hooks.register('charlink')

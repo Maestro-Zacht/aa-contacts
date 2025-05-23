@@ -31,6 +31,7 @@ def alliance_contacts(request, alliance_pk: int):
 
     contacts = (
         AllianceContact.objects
+        .with_contact_name()
         .filter(alliance=token.alliance)
         .prefetch_related('labels')
     )
@@ -54,6 +55,7 @@ def corporation_contacts(request, corporation_pk: int):
 
     contacts = (
         CorporationContact.objects
+        .with_contact_name()
         .filter(corporation=token.corporation)
         .prefetch_related('labels')
     )

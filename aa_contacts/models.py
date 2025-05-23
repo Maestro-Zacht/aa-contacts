@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from collections import defaultdict
 
 from django.db import models
@@ -7,6 +9,18 @@ from django.contrib.auth.models import User
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveAllianceInfo, EveCharacter, EveCorporationInfo, EveFactionInfo
 from esi.models import Token
+
+
+class General(models.Model):
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = (
+            ('manage_alliance_contacts', 'Can manage alliance contacts'),
+            ('manage_corporation_contacts', 'Can manage corporation contacts'),
+            ('view_alliance_notes', 'Can view notes on alliance contacts'),
+            ('view_corporation_notes', 'Can view notes on corporation contacts'),
+        )
 
 
 class ContactTokenQueryset(models.QuerySet):
@@ -52,6 +66,45 @@ class ContactQueryset(models.QuerySet):
             models.Q(contact_id__in=user_factions, contact_type=Contact.ContactTypeOptions.FACTION)
         )
 
+    def with_contact_name(self):
+        return self.annotate(
+            contact_name_annotation=models.Case(
+                models.When(
+                    contact_type=Contact.ContactTypeOptions.CHARACTER,
+                    then=models.Subquery(
+                        EveCharacter.objects
+                        .filter(character_id=models.OuterRef('contact_id'))
+                        .values('character_name')
+                    )
+                ),
+                models.When(
+                    contact_type=Contact.ContactTypeOptions.CORPORATION,
+                    then=models.Subquery(
+                        EveCorporationInfo.objects
+                        .filter(corporation_id=models.OuterRef('contact_id'))
+                        .values('corporation_name')
+                    )
+                ),
+                models.When(
+                    contact_type=Contact.ContactTypeOptions.ALLIANCE,
+                    then=models.Subquery(
+                        EveAllianceInfo.objects
+                        .filter(alliance_id=models.OuterRef('contact_id'))
+                        .values('alliance_name')
+                    )
+                ),
+                models.When(
+                    contact_type=Contact.ContactTypeOptions.FACTION,
+                    then=models.Subquery(
+                        EveFactionInfo.objects
+                        .filter(faction_id=models.OuterRef('contact_id'))
+                        .values('faction_name')
+                    )
+                ),
+                default=models.Value(''),
+            )
+        )
+
 
 class ContactManager(models.Manager):
     def get_queryset(self):
@@ -60,17 +113,8 @@ class ContactManager(models.Manager):
     def about(self, user_filter, only_main):
         return self.get_queryset().about(user_filter, only_main)
 
-
-class General(models.Model):
-    class Meta:
-        managed = False
-        default_permissions = ()
-        permissions = (
-            ('manage_alliance_contacts', 'Can manage alliance contacts'),
-            ('manage_corporation_contacts', 'Can manage corporation contacts'),
-            ('view_alliance_notes', 'Can view notes on alliance contacts'),
-            ('view_corporation_notes', 'Can view notes on corporation contacts'),
-        )
+    def with_contact_name(self):
+        return self.get_queryset().with_contact_name()
 
 
 class ContactLabel(models.Model):
@@ -95,7 +139,7 @@ class Contact(models.Model):
     standing = models.FloatField()
     notes = models.TextField(blank=True, default='')
 
-    objects = ContactManager()
+    objects: ClassVar[ContactManager] = ContactManager()
 
     class Meta:
         abstract = True
@@ -114,7 +158,7 @@ class Contact(models.Model):
         return ''
 
     @property
-    def contact_name(self) -> str:
+    def _load_contact_name(self) -> str:
         if self.contact_type == self.ContactTypeOptions.CHARACTER:
             try:
                 res = EveCharacter.objects.get(character_id=self.contact_id).character_name
@@ -141,9 +185,20 @@ class Contact(models.Model):
                 EveFactionInfo.objects.create(faction_id=faction.id, faction_name=faction.name)
                 res = faction.name
         else:
-            res = ''
+            raise ValueError(f"Unknown contact type: {self.contact_type}")
 
         return res
+
+    @property
+    def contact_name(self) -> str:
+        if (
+            not hasattr(self, 'contact_name_annotation')
+            or self.contact_name_annotation is None
+            or self.contact_name_annotation == ''
+        ):
+            return self._load_contact_name
+        else:
+            return self.contact_name_annotation
 
     @classmethod
     def filter_missing_contact_name(cls, pk_list: list[int]) -> list[int]:
@@ -182,7 +237,7 @@ class ContactToken(models.Model):
 
     last_update = models.DateTimeField(default=timezone.now)
 
-    objects = ContactTokenManager()
+    objects: ClassVar[ContactTokenManager] = ContactTokenManager()
 
     class Meta:
         abstract = True

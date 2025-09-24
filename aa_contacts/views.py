@@ -10,6 +10,16 @@ from allianceauth.eveonline.models import EveCharacter, EveAllianceInfo, EveCorp
 from .models import AllianceContact, AllianceToken, CorporationToken, CorporationContact
 from .tasks import update_alliance_contacts, update_corporation_contacts
 from .forms import AllianceContactForm, CorporationContactForm
+from . import __version__
+
+
+@login_required
+def react_view(request):
+    context = {
+        'version': __version__,
+    }
+
+    return render(request, 'aa_contacts/react_base.html', context=context)
 
 
 @login_required

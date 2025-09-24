@@ -40,14 +40,8 @@ x-allianceauth-health-check: &allianceauth-health-checks
 
 services:
   auth_mysql:
-    image: mariadb:10.11
-    command:
-      [
-        mysqld,
-        --character-set-server=utf8mb4,
-        --collation-server=utf8mb4_unicode_ci,
-        --default-authentication-plugin=mysql_native_password
-      ]
+    image: mariadb:11.8
+    command: [ mariadbd, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --default-authentication-plugin=mysql_native_password ]
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
@@ -56,14 +50,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${AA_DB_ROOT_PASSWORD?err}
       - MARIADB_MYSQL_LOCALHOST_USER=1
     healthcheck:
-      test:
-        [
-          "CMD",
-          "healthcheck.sh",
-          "--su=mysql",
-          "--connect",
-          "--innodb_initialized"
-        ]
+      test: [ "CMD", "healthcheck.sh", "--su=mysql", "--connect", "--innodb_initialized" ]
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -72,7 +59,7 @@ services:
         max-file: "5"
 
   redis:
-    image: redis:7
+    image: redis:8
     command: redis-server
     restart: always
     volumes:
@@ -99,17 +86,7 @@ services:
 
   allianceauth_worker:
     <<: [ *allianceauth-base, *allianceauth-health-checks ]
-    entrypoint:
-      [
-        "celery",
-        "-A",
-        "myauth",
-        "worker",
-        "--pool=threads",
-        "--concurrency=10",
-        "-n",
-        "worker_%n"
-      ]
+    entrypoint: [ "celery", "-A", "myauth", "worker", "--pool=threads", "--concurrency=10", "-n", "worker_%n" ]
     deploy:
       replicas: 1
 

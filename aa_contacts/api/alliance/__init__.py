@@ -1,6 +1,6 @@
 from ninja import Router
 
-from .token import router as token_router
+from .tokens import router as token_router
 
 router = Router()
 

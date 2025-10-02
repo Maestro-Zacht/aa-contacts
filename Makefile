@@ -12,3 +12,8 @@ translations:
 compile_translations:
 	@echo "Compiling translation files"
 	@django-admin compilemessages
+
+.PHONY: dev
+dev:
+	@echo "Starting development server"
+	@cd frontend && npm run dev

@@ -87,6 +87,7 @@ INSTALLED_APPS += [
 
     'aa_contacts',
 
+    'ninja',
     "debug_toolbar",
     'taskmonitor',
 

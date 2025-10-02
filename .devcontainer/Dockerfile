@@ -2,7 +2,7 @@ ARG AA_DOCKER_TAG
 FROM $AA_DOCKER_TAG
 
 USER root
-RUN apt-get update && apt-get install make gnupg2 gettext -y
+RUN apt-get update && apt-get install make gnupg2 gettext curl wget -y
 USER ${AUTH_USER}
 
 # set env

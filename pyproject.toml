@@ -42,6 +42,7 @@ dependencies = [
     "allianceauth~=4.6",
 	"allianceauth-app-utils~=1.14",
 	"django-esi>=7.0.1",
+	"django-ninja~=1.4",
 ]
 
 [project.urls]

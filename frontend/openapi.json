@@ -1,0 +1,188 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "AA Contacts API",
+        "version": "0.0.1",
+        "description": ""
+    },
+    "paths": {
+        "/contacts/api/alliance/tokens/": {
+            "get": {
+                "operationId": "aa_contacts_api_alliance_token_get_list",
+                "summary": "Get List",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/AllianceTokenSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporation/tokens/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_token_get_list",
+                "summary": "Get List",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CorporationTokenSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AllianceTokenSchema": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "last_update": {
+                        "format": "date-time",
+                        "title": "Last Update",
+                        "type": "string"
+                    },
+                    "alliance": {
+                        "$ref": "#/components/schemas/EveAllianceSchema"
+                    }
+                },
+                "required": [
+                    "id",
+                    "last_update",
+                    "alliance"
+                ],
+                "title": "AllianceTokenSchema",
+                "type": "object"
+            },
+            "EveAllianceSchema": {
+                "properties": {
+                    "logo_url": {
+                        "title": "Logo Url",
+                        "type": "string"
+                    },
+                    "alliance_id": {
+                        "title": "Alliance Id",
+                        "type": "integer"
+                    },
+                    "alliance_name": {
+                        "maxLength": 254,
+                        "title": "Alliance Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "logo_url",
+                    "alliance_id",
+                    "alliance_name"
+                ],
+                "title": "EveAllianceSchema",
+                "type": "object"
+            },
+            "CorporationTokenSchema": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "last_update": {
+                        "format": "date-time",
+                        "title": "Last Update",
+                        "type": "string"
+                    },
+                    "corporation": {
+                        "$ref": "#/components/schemas/EveCorporationSchema"
+                    }
+                },
+                "required": [
+                    "id",
+                    "last_update",
+                    "corporation"
+                ],
+                "title": "CorporationTokenSchema",
+                "type": "object"
+            },
+            "EveCorporationSchema": {
+                "properties": {
+                    "alliance": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EveAllianceSchema"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "logo_url": {
+                        "title": "Logo Url",
+                        "type": "string"
+                    },
+                    "corporation_id": {
+                        "title": "Corporation Id",
+                        "type": "integer"
+                    },
+                    "corporation_name": {
+                        "maxLength": 254,
+                        "title": "Corporation Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "logo_url",
+                    "corporation_id",
+                    "corporation_name"
+                ],
+                "title": "EveCorporationSchema",
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "SessionAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    },
+    "servers": []
+}

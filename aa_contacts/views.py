@@ -14,6 +14,11 @@ from . import __version__
 
 
 @login_required
+def index(request):
+    return redirect('aa_contacts:react_view')
+
+
+@login_required
 def react_view(request):
     context = {
         'version': __version__,
@@ -23,7 +28,7 @@ def react_view(request):
 
 
 @login_required
-def index(request):
+def dashboard(request):
     context = {
         'alliance_tokens': AllianceToken.visible_for(request.user).select_related('alliance'),
         'corporation_tokens': CorporationToken.visible_for(request.user).select_related('corporation'),
@@ -37,7 +42,7 @@ def alliance_contacts(request, alliance_pk: int):
         token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
     except AllianceToken.DoesNotExist:
         messages.error(request, _('You do not have the permissions for viewing this alliance contacts.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     contacts = (
         AllianceContact.objects
@@ -61,7 +66,7 @@ def corporation_contacts(request, corporation_pk: int):
         token = CorporationToken.visible_for(request.user).select_related('corporation').get(corporation_id=corporation_pk)
     except CorporationToken.DoesNotExist:
         messages.error(request, _('You do not have the permissions for viewing this corporation contacts.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     contacts = (
         CorporationContact.objects
@@ -87,7 +92,7 @@ def add_alliance_token(request, token: Token):
 
     if char.alliance_id is None:
         messages.error(request, _('You need to be in an alliance to add alliance contacts.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     try:
         alliance = char.alliance
@@ -96,13 +101,13 @@ def add_alliance_token(request, token: Token):
 
     if AllianceToken.objects.filter(alliance=alliance).exists():
         messages.error(request, _('Alliance contacts for your alliance are already being tracked.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     AllianceToken.objects.create(alliance=alliance, token=token)
     update_alliance_contacts.delay(alliance.alliance_id)
 
     messages.success(request, _('Alliance contacts are now being tracked.'))
-    return redirect('aa_contacts:index')
+    return redirect('aa_contacts:dashboard')
 
 
 @login_required
@@ -118,13 +123,13 @@ def add_corporation_token(request, token: Token):
 
     if CorporationToken.objects.filter(corporation=corporation).exists():
         messages.error(request, _('Corporation contacts for your corporation are already being tracked.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     CorporationToken.objects.create(corporation=corporation, token=token)
     update_corporation_contacts.delay(corporation.corporation_id)
 
     messages.success(request, _('Corporation contacts are now being tracked.'))
-    return redirect('aa_contacts:index')
+    return redirect('aa_contacts:dashboard')
 
 
 @login_required
@@ -134,7 +139,7 @@ def update_alliance(request, alliance_pk: int):
         token = AllianceToken.visible_for(request.user).select_related('alliance').get(alliance_id=alliance_pk)
     except AllianceToken.DoesNotExist:
         messages.error(request, _('You do not have the permissions for viewing this alliance contacts.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     update_alliance_contacts.delay(token.alliance.alliance_id)
 
@@ -149,7 +154,7 @@ def update_corporation(request, corporation_pk: int):
         token = CorporationToken.visible_for(request.user).select_related('corporation').get(corporation_id=corporation_pk)
     except CorporationToken.DoesNotExist:
         messages.error(request, _('You do not have the permissions for viewing this corporation contacts.'))
-        return redirect('aa_contacts:index')
+        return redirect('aa_contacts:dashboard')
 
     update_corporation_contacts.delay(token.corporation.corporation_id)
 

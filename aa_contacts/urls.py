@@ -8,6 +8,7 @@ app_name = 'aa_contacts'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('api/', api.urls),
     re_path('^r/', views.react_view, name='react_view'),
     path('alliance/<int:alliance_pk>/', views.alliance_contacts, name='alliance_contacts'),

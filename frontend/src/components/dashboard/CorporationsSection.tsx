@@ -6,7 +6,7 @@ import { getCorporationContactTokens } from "../../api/api";
 
 export default function CorporationsSection() {
     const { data, isLoading, error } = useQuery({
-        queryKey: ['corporation', 'tokens'],
+        queryKey: ['corporations', 'tokens'],
         queryFn: getCorporationContactTokens,
     });
 
@@ -28,7 +28,7 @@ export default function CorporationsSection() {
                     <>
                         {
                             corporationTokens.map(token => (
-                                <Col key={token.id} xs="auto" className="mx-5">
+                                <Col key={token.corporation.corporation_id} xs="auto" className="mx-5">
                                     <TokenPortrait
                                         imgUrl={token.corporation.logo_url}
                                         name={token.corporation.corporation_name}

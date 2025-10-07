@@ -36,7 +36,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         queryKey: [entityType.toLowerCase(), entityId, 'contacts'],
         queryFn: entityType === "Corporation" ?
             () => getCorporationContacts(entityId) :
-            () => getAllianceContacts(entityId)
+            () => getAllianceContacts(entityId),
     });
 
     if (error) {

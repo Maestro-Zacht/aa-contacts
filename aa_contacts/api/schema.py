@@ -37,7 +37,6 @@ class EveCorporationSchema(ModelSchema):
 
 
 class TokenSchema(Schema):
-    id: int
     last_update: datetime
 
 

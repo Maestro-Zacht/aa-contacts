@@ -37,6 +37,49 @@
                 ]
             }
         },
+        "/contacts/api/alliances/tokens/{alliance_id}/": {
+            "get": {
+                "operationId": "aa_contacts_api_alliance_tokens_get_single",
+                "summary": "Get Single",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AllianceTokenSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/alliances/{alliance_id}/contacts/": {
             "get": {
                 "operationId": "aa_contacts_api_alliance_contacts_list_contacts",
@@ -115,6 +158,49 @@
                 ]
             }
         },
+        "/contacts/api/corporations/tokens/{corporation_id}/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_tokens_get_single",
+                "summary": "Get Single",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CorporationTokenSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/corporations/{corporation_id}/contacts/": {
             "get": {
                 "operationId": "aa_contacts_api_corporation_contacts_list_contacts",
@@ -167,10 +253,6 @@
         "schemas": {
             "AllianceTokenSchema": {
                 "properties": {
-                    "id": {
-                        "title": "Id",
-                        "type": "integer"
-                    },
                     "last_update": {
                         "format": "date-time",
                         "title": "Last Update",
@@ -181,7 +263,6 @@
                     }
                 },
                 "required": [
-                    "id",
                     "last_update",
                     "alliance"
                 ],
@@ -288,10 +369,6 @@
             },
             "CorporationTokenSchema": {
                 "properties": {
-                    "id": {
-                        "title": "Id",
-                        "type": "integer"
-                    },
                     "last_update": {
                         "format": "date-time",
                         "title": "Last Update",
@@ -302,7 +379,6 @@
                     }
                 },
                 "required": [
-                    "id",
                     "last_update",
                     "corporation"
                 ],

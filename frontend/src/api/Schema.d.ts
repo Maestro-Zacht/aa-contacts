@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contacts/api/alliances/tokens/{alliance_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Single */
+        get: operations["aa_contacts_api_alliance_tokens_get_single"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contacts/api/alliances/{alliance_id}/contacts/": {
         parameters: {
             query?: never;
@@ -55,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contacts/api/corporations/tokens/{corporation_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Single */
+        get: operations["aa_contacts_api_corporation_tokens_get_single"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contacts/api/corporations/{corporation_id}/contacts/": {
         parameters: {
             query?: never;
@@ -78,8 +112,6 @@ export interface components {
     schemas: {
         /** AllianceTokenSchema */
         AllianceTokenSchema: {
-            /** Id */
-            id: number;
             /**
              * Last Update
              * Format: date-time
@@ -127,8 +159,6 @@ export interface components {
         ContactTypeOptions: "character" | "corporation" | "alliance" | "faction";
         /** CorporationTokenSchema */
         CorporationTokenSchema: {
-            /** Id */
-            id: number;
             /**
              * Last Update
              * Format: date-time
@@ -172,6 +202,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AllianceTokenSchema"][];
                 };
+            };
+        };
+    };
+    aa_contacts_api_alliance_tokens_get_single: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllianceTokenSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -228,6 +294,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CorporationTokenSchema"][];
                 };
+            };
+        };
+    };
+    aa_contacts_api_corporation_tokens_get_single: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorporationTokenSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

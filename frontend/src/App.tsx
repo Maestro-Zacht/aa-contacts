@@ -3,10 +3,16 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router";
 
 import Dashboard from "./components/dashboard/Dashboard";
 import ErrorPage from "./components/ErrorPage";
-import ContactTable from "./components/contacts/ContactTable";
+import ContactList from "./components/contacts/ContactList";
 
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    }
+  }
+});
 
 declare global {
   interface Window {
@@ -26,8 +32,8 @@ function App() {
         <Routes>
           <Route path="/contacts/r/">
             <Route index element={<Dashboard />} />
-            <Route path="alliance/:allianceId/contacts" element={<ContactTable entityType="Alliance" />} />
-            <Route path="corporation/:corporationId/contacts" element={<ContactTable entityType="Corporation" />} />
+            <Route path="alliance/:allianceId/contacts" element={<ContactList entityType="Alliance" />} />
+            <Route path="corporation/:corporationId/contacts" element={<ContactList entityType="Corporation" />} />
             <Route path="*" element={<ErrorPage errorCode={404} message="Page Not Found" />} />
           </Route>
           <Route path="*" element={<Navigate to="/contacts/r/" replace />} />

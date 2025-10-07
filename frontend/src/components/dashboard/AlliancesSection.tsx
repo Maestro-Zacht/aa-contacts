@@ -7,8 +7,8 @@ import TokenPortrait from "./TokenPortrait";
 
 export default function AlliancesSection() {
     const { data, isLoading, error } = useQuery({
-        queryKey: ['alliance', 'tokens'],
-        queryFn: getAllianceContactTokens
+        queryKey: ['alliances', 'tokens'],
+        queryFn: getAllianceContactTokens,
     });
 
     if (error) {
@@ -29,7 +29,7 @@ export default function AlliancesSection() {
                     <>
                         {
                             allianceTokens.map(token => (
-                                <Col key={token.id} xs="auto" className="mx-5">
+                                <Col key={token.alliance.alliance_id} xs="auto" className="mx-5">
                                     <TokenPortrait
                                         imgUrl={token.alliance.logo_url}
                                         name={token.alliance.alliance_name}

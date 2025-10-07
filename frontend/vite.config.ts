@@ -47,6 +47,11 @@ export default defineConfig({
             return '@react-libs';
           }
           if (
+            id.includes('datatables')
+          ) {
+            return '@datatables-libs';
+          }
+          if (
             id.includes('buffer') ||
             id.includes('chart.js') ||
             id.includes('react-chartjs-2') ||

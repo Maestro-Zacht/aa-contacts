@@ -30,7 +30,12 @@ export default function AlliancesSection() {
                         {
                             allianceTokens.map(token => (
                                 <Col key={token.id} xs="auto" className="mx-5">
-                                    <TokenPortrait img_url={token.alliance.logo_url} name={token.alliance.alliance_name} />
+                                    <TokenPortrait
+                                        imgUrl={token.alliance.logo_url}
+                                        name={token.alliance.alliance_name}
+                                        entityId={token.alliance.alliance_id}
+                                        entityType="Alliance"
+                                    />
                                 </Col>
                             ))
                         }

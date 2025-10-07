@@ -29,7 +29,12 @@ export default function CorporationsSection() {
                         {
                             corporationTokens.map(token => (
                                 <Col key={token.id} xs="auto" className="mx-5">
-                                    <TokenPortrait img_url={token.corporation.logo_url} name={token.corporation.corporation_name} />
+                                    <TokenPortrait
+                                        imgUrl={token.corporation.logo_url}
+                                        name={token.corporation.corporation_name}
+                                        entityId={token.corporation.corporation_id}
+                                        entityType="Corporation"
+                                    />
                                 </Col>
                             ))
                         }

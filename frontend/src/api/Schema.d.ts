@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/contacts/api/alliance/tokens/": {
+    "/contacts/api/alliances/tokens/": {
         parameters: {
             query?: never;
             header?: never;
@@ -12,7 +12,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get List */
-        get: operations["aa_contacts_api_alliance_token_get_list"];
+        get: operations["aa_contacts_api_alliance_tokens_get_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -21,7 +21,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/contacts/api/corporation/tokens/": {
+    "/contacts/api/alliances/{alliance_id}/contacts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Contacts */
+        get: operations["aa_contacts_api_alliance_contacts_list_contacts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contacts/api/corporations/tokens/": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,7 +46,24 @@ export interface paths {
             cookie?: never;
         };
         /** Get List */
-        get: operations["aa_contacts_api_corporation_token_get_list"];
+        get: operations["aa_contacts_api_corporation_tokens_get_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contacts/api/corporations/{corporation_id}/contacts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Contacts */
+        get: operations["aa_contacts_api_corporation_contacts_list_contacts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -62,6 +96,35 @@ export interface components {
             /** Alliance Name */
             alliance_name: string;
         };
+        /** ContactLabelSchema */
+        ContactLabelSchema: {
+            /** Label Name */
+            label_name: string;
+        };
+        /** ContactSchema */
+        ContactSchema: {
+            /** Contact Id */
+            contact_id: number;
+            contact_type: components["schemas"]["ContactTypeOptions"];
+            /** Contact Logo Url */
+            contact_logo_url: string;
+            /** Contact Name */
+            contact_name: string;
+            /** Standing */
+            standing: number;
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Labels
+             * @default []
+             */
+            labels: components["schemas"]["ContactLabelSchema"][];
+        };
+        /**
+         * ContactTypeOptions
+         * @enum {string}
+         */
+        ContactTypeOptions: "character" | "corporation" | "alliance" | "faction";
         /** CorporationTokenSchema */
         CorporationTokenSchema: {
             /** Id */
@@ -92,7 +155,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    aa_contacts_api_alliance_token_get_list: {
+    aa_contacts_api_alliance_tokens_get_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -112,7 +175,43 @@ export interface operations {
             };
         };
     };
-    aa_contacts_api_corporation_token_get_list: {
+    aa_contacts_api_alliance_contacts_list_contacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactSchema"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_tokens_get_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -129,6 +228,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CorporationTokenSchema"][];
                 };
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_list_contacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactSchema"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

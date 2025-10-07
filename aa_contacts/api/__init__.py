@@ -15,5 +15,5 @@ api = NinjaAPI(
     openapi_url=settings.DEBUG and "/openapi.json" or ""
 )
 
-api.add_router("/alliance", alliance_router)
-api.add_router("/corporation", corporation_router)
+api.add_router("/alliances", alliance_router)
+api.add_router("/corporations", corporation_router)

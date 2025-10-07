@@ -6,9 +6,9 @@
         "description": ""
     },
     "paths": {
-        "/contacts/api/alliance/tokens/": {
+        "/contacts/api/alliances/tokens/": {
             "get": {
-                "operationId": "aa_contacts_api_alliance_token_get_list",
+                "operationId": "aa_contacts_api_alliance_tokens_get_list",
                 "summary": "Get List",
                 "parameters": [],
                 "responses": {
@@ -37,9 +37,56 @@
                 ]
             }
         },
-        "/contacts/api/corporation/tokens/": {
+        "/contacts/api/alliances/{alliance_id}/contacts/": {
             "get": {
-                "operationId": "aa_contacts_api_corporation_token_get_list",
+                "operationId": "aa_contacts_api_alliance_contacts_list_contacts",
+                "summary": "List Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ContactSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/tokens/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_tokens_get_list",
                 "summary": "Get List",
                 "parameters": [],
                 "responses": {
@@ -60,6 +107,53 @@
                 },
                 "tags": [
                     "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_contacts_list_contacts",
+                "summary": "List Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ContactSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
                 ],
                 "security": [
                     {
@@ -117,6 +211,80 @@
                 ],
                 "title": "EveAllianceSchema",
                 "type": "object"
+            },
+            "ContactLabelSchema": {
+                "properties": {
+                    "label_name": {
+                        "title": "Label Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label_name"
+                ],
+                "title": "ContactLabelSchema",
+                "type": "object"
+            },
+            "ContactSchema": {
+                "properties": {
+                    "contact_id": {
+                        "title": "Contact Id",
+                        "type": "integer"
+                    },
+                    "contact_type": {
+                        "$ref": "#/components/schemas/ContactTypeOptions"
+                    },
+                    "contact_logo_url": {
+                        "title": "Contact Logo Url",
+                        "type": "string"
+                    },
+                    "contact_name": {
+                        "title": "Contact Name",
+                        "type": "string"
+                    },
+                    "standing": {
+                        "title": "Standing",
+                        "type": "number"
+                    },
+                    "notes": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Notes"
+                    },
+                    "labels": {
+                        "default": [],
+                        "items": {
+                            "$ref": "#/components/schemas/ContactLabelSchema"
+                        },
+                        "title": "Labels",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "contact_id",
+                    "contact_type",
+                    "contact_logo_url",
+                    "contact_name",
+                    "standing"
+                ],
+                "title": "ContactSchema",
+                "type": "object"
+            },
+            "ContactTypeOptions": {
+                "enum": [
+                    "character",
+                    "corporation",
+                    "alliance",
+                    "faction"
+                ],
+                "title": "ContactTypeOptions",
+                "type": "string"
             },
             "CorporationTokenSchema": {
                 "properties": {

@@ -25,16 +25,16 @@ function Header({ name, lastUpdate }: { name: string, lastUpdate: string }) {
                         <Card className="text-center">
                             <Card.Header>Info</Card.Header>
                             <Card.Body>
-                                <Card.Text>
-                                    <Row>
-                                        <Col>
+                                <Row>
+                                    <Col>
+                                        <Card.Text>
                                             Last Updated: <Badge className="text-center ms-1" bg="success">
                                                 <TimeAgo date={lastUpdate} />
                                             </Badge>
-                                        </Col>
-                                    </Row>
-                                    <Button className="mt-4">Update</Button>
-                                </Card.Text>
+                                        </Card.Text>
+                                    </Col>
+                                </Row>
+                                <Button className="mt-4">Update</Button>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -104,7 +104,6 @@ export default function ContactList({ entityType }: ContactListProps) {
                     </Col>
                 </Row>
             </Container>
-
         </>
     )
 }

@@ -1,4 +1,4 @@
-import "../styles/DataTables.css";
+import "./DataTables.css";
 
 import DataTable from 'datatables.net-react';
 import DataTablesCore from 'datatables.net-bs5';

@@ -5,7 +5,7 @@ import type { Api as DTApi } from 'datatables.net-bs5';
 import type { DataTableRef } from "datatables.net-react";
 
 import Loading from "../Loading";
-import DataTable from "../DataTableBase";
+import DataTable from "../tables/DataTableBase";
 import type { components } from "../../api/Schema";
 
 import { getAllianceContacts, getCorporationContacts } from "../../api/api";
@@ -58,31 +58,37 @@ export default function ContactTable({ entityType }: ContactTableProps) {
     }
 
     const renderLabels = (data: components["schemas"]["ContactLabelSchema"][], type: string, _: any) => {
-        if (type !== 'display') {
-            return data.sort((a, b) => a.label_name.localeCompare(b.label_name))
-                .map(label => label.label_name).join(", ");
+        data.sort((a, b) => a.label_name.localeCompare(b.label_name));
+        switch (type) {
+            case 'display':
+                return <>
+                    {data.map(
+                        label => (
+                            <Badge bg="secondary" key={label.label_name} className="me-1">
+                                {label.label_name}
+                            </Badge>
+                        )
+                    )}
+                </>
+            default:
+                return data.map(label => label.label_name).join(", ");
         }
-        return <>
-            {data.map(
-                label => (
-                    <Badge bg="secondary" key={label.label_name} className="me-1">
-                        {label.label_name}
-                    </Badge>
-                )
-            )}
-        </>
     }
 
     const renderContactName = (data: string, type: string, row: components["schemas"]["ContactSchema"]) => {
-        if (type !== 'display') return data;
-        return <>
-            <Image
-                src={`${row.contact_logo_url}?size=32`}
-                alt={data} className="me-2" rounded
-                onLoad={() => setImagesLoaded((prev) => prev + 1)}
-            />
-            {data}
-        </>
+        switch (type) {
+            case 'display':
+                return <>
+                    <Image
+                        src={`${row.contact_logo_url}?size=32`}
+                        alt={data} className="me-2" rounded
+                        onLoad={() => setImagesLoaded((prev) => prev + 1)}
+                    />
+                    {data}
+                </>
+            default:
+                return data;
+        }
     }
 
     useEffect(() => {
@@ -96,28 +102,46 @@ export default function ContactTable({ entityType }: ContactTableProps) {
             <Card.Body>
                 {isLoading ?
                     <Loading /> :
-                    <div className="table-responsive p-3">
-                        <DataTable
-                            columns={columns} data={contacts}
-                            className="table table-aa w-100"
-                            onPreDraw={handleNotesColumnVisibility}
-                            slots={{
-                                0: renderContactName,
-                                2: renderLabels
-                            }}
-                            ref={tableRef}
-                        >
-                            <thead>
-                                <tr>
-                                    <th>Contact</th>
-                                    <th>Contact Type</th>
-                                    <th>Labels</th>
-                                    <th>Standings</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                        </DataTable>
-                    </div>
+                    <DataTable
+                        columns={columns} data={contacts}
+                        className="table table-aa"
+                        onPreDraw={handleNotesColumnVisibility}
+                        slots={{
+                            0: renderContactName,
+                            2: renderLabels
+                        }}
+                        ref={tableRef}
+                        options={{
+                            pageLength: 50,
+                            columnControl: [
+                                {
+                                    target: 'thead:0',
+                                    content: [
+                                        'orderStatus',
+                                        ['orderAddAsc', 'orderAddDesc', 'orderRemove', 'orderClear']
+                                    ]
+                                },
+                                {
+                                    target: 'thead:1',
+                                    content: ['search']
+                                },
+                            ],
+                            ordering: {
+                                indicators: false,
+                            },
+                            scrollX: true,
+                        }}
+                    >
+                        <thead>
+                            <tr>
+                                <th>Contact</th>
+                                <th>Contact Type</th>
+                                <th>Labels</th>
+                                <th>Standings</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                    </DataTable>
                 }
             </Card.Body>
         </Card >

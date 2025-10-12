@@ -127,6 +127,42 @@
                 ]
             }
         },
+        "/contacts/api/alliances/{alliance_id}/contacts/update": {
+            "post": {
+                "operationId": "aa_contacts_api_alliance_contacts_update_contacts",
+                "summary": "Update Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/corporations/tokens/": {
             "get": {
                 "operationId": "aa_contacts_api_corporation_tokens_get_list",
@@ -230,6 +266,42 @@
                                 }
                             }
                         }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/update": {
+            "post": {
+                "operationId": "aa_contacts_api_corporation_contacts_update_contacts",
+                "summary": "Update Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     },
                     "403": {
                         "description": "Forbidden"

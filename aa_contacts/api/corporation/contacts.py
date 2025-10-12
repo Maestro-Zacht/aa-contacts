@@ -5,6 +5,7 @@ from ninja import Router, Path
 from allianceauth.authentication.models import CharacterOwnership
 
 from aa_contacts.models import CorporationToken, CorporationContact
+from aa_contacts.tasks import update_corporation_contacts
 from ..schema import ContactSchema
 
 router = Router()
@@ -30,3 +31,23 @@ def list_contacts(request, corporation_id: int = Path(...)):
     )
 
     return 200, contacts
+
+
+@router.post("/update", response={200: None, 403: None, 404: None})
+def update_contacts(request, corporation_id: int = Path(...)):
+    user: User = request.user
+
+    ownerships = CharacterOwnership.objects.filter(user=user)
+    if not user.is_superuser and not ownerships.filter(character__corporation_id=corporation_id).exists():
+        return 403, None
+
+    token = (
+        CorporationToken.visible_for(user)
+        .filter(corporation__corporation_id=corporation_id)
+    )
+    if not token.exists():
+        return 404, None
+
+    update_corporation_contacts(corporation_id)
+
+    return 200, None

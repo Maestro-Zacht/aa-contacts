@@ -66,3 +66,25 @@ export async function getCorporationToken(corporationId: number) {
     }
     return data;
 }
+
+export async function updateAllianceContacts(allianceId: number) {
+    const { error } = await apiClient.POST(
+        "/contacts/api/alliances/{alliance_id}/contacts/update",
+        { params: { path: { alliance_id: allianceId } } }
+    );
+    if (error) {
+        console.error("Error updating alliance contacts: ", error);
+        throw error;
+    }
+}
+
+export async function updateCorporationContacts(corporationId: number) {
+    const { error } = await apiClient.POST(
+        "/contacts/api/corporations/{corporation_id}/contacts/update",
+        { params: { path: { corporation_id: corporationId } } }
+    );
+    if (error) {
+        console.error("Error updating corporation contacts: ", error);
+        throw error;
+    }
+}

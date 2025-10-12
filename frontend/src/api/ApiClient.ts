@@ -5,7 +5,7 @@ import createClient from "openapi-fetch";
 const apiClient = createClient<paths>({
     baseUrl: "/",
     headers: {
-        "X-CSRF-Token": Cookies.get("XSRF-TOKEN") || "",
+        "X-CSRFToken": Cookies.get("csrftoken") || "",
     },
 });
 

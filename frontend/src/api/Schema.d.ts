@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contacts/api/alliances/{alliance_id}/contacts/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Contacts */
+        post: operations["aa_contacts_api_alliance_contacts_update_contacts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contacts/api/corporations/tokens/": {
         parameters: {
             query?: never;
@@ -100,6 +117,23 @@ export interface paths {
         get: operations["aa_contacts_api_corporation_contacts_list_contacts"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contacts/api/corporations/{corporation_id}/contacts/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Contacts */
+        post: operations["aa_contacts_api_corporation_contacts_update_contacts"];
         delete?: never;
         options?: never;
         head?: never;
@@ -277,6 +311,40 @@ export interface operations {
             };
         };
     };
+    aa_contacts_api_alliance_contacts_update_contacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     aa_contacts_api_corporation_tokens_get_list: {
         parameters: {
             query?: never;
@@ -352,6 +420,40 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ContactSchema"][];
                 };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_update_contacts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Forbidden */
             403: {

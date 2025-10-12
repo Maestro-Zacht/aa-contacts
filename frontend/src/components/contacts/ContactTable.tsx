@@ -113,17 +113,50 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                         ref={tableRef}
                         options={{
                             pageLength: 50,
+                            columnDefs: [
+                                {
+                                    targets: [1, 2],
+                                    columnControl: [
+                                        {
+                                            target: 'thead:0',
+                                            className: 'dtcc-row_no-bottom-border',
+                                            content: [
+                                                'orderStatus',
+                                                ['orderAddAsc', 'orderAddDesc', 'orderRemove', 'orderClear'],
+                                                {
+                                                    extend: 'dropdown',
+                                                    text: 'Search',
+                                                    icon: 'search',
+                                                    content: [
+                                                        {
+                                                            extend: 'searchList',
+                                                            orthogonal: 'filter',
+                                                        },
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            target: 'thead:1',
+                                            className: 'dtcc-row_no-top-padding',
+                                            content: [],
+                                        }
+                                    ]
+                                }
+                            ],
                             columnControl: [
                                 {
                                     target: 'thead:0',
+                                    className: 'dtcc-row_no-bottom-border',
                                     content: [
                                         'orderStatus',
                                         ['orderAddAsc', 'orderAddDesc', 'orderRemove', 'orderClear']
-                                    ]
+                                    ],
                                 },
                                 {
                                     target: 'thead:1',
-                                    content: ['search']
+                                    className: 'dtcc-row_no-top-padding',
+                                    content: ['search'],
                                 },
                             ],
                             ordering: {

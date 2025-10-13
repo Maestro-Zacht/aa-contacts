@@ -5,6 +5,7 @@ from django.conf import settings
 
 from .alliance import router as alliance_router
 from .corporation import router as corporation_router
+from .permissions import router as permissions_router
 
 api = NinjaAPI(
     title="AA Contacts API",
@@ -17,3 +18,4 @@ api = NinjaAPI(
 
 api.add_router("/alliances", alliance_router)
 api.add_router("/corporations", corporation_router)
+api.add_router("/permissions", permissions_router)

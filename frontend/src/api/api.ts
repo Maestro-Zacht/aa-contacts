@@ -1,6 +1,15 @@
 import apiClient from "./ApiClient";
 
 
+export async function getUserPermission() {
+    const { data, error } = await apiClient.GET("/contacts/api/permissions/me");
+    if (error) {
+        console.error("Error fetching user permissions: ", error);
+        throw error;
+    }
+    return data;
+}
+
 export async function getAllianceContactTokens() {
     const { data, error } = await apiClient.GET("/contacts/api/alliances/tokens/");
     if (error) {

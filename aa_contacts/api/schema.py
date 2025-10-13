@@ -13,6 +13,11 @@ from allianceauth.services.hooks import get_extension_logger
 logger = get_extension_logger(__name__)
 
 
+class UserPermissionsSchema(Schema):
+    can_manage_alliance_contacts: bool
+    can_manage_corporation_contacts: bool
+
+
 class EveAllianceSchema(ModelSchema):
     logo_url: str
 

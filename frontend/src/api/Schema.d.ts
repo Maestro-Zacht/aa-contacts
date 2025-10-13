@@ -174,6 +174,23 @@ export interface paths {
         patch: operations["aa_contacts_api_corporation_contacts_edit_contact"];
         trace?: never;
     };
+    "/contacts/api/permissions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Me */
+        get: operations["aa_contacts_api_permissions_get_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -252,6 +269,13 @@ export interface components {
             corporation_id: number;
             /** Corporation Name */
             corporation_name: string;
+        };
+        /** UserPermissionsSchema */
+        UserPermissionsSchema: {
+            /** Can Manage Alliance Contacts */
+            can_manage_alliance_contacts: boolean;
+            /** Can Manage Corporation Contacts */
+            can_manage_corporation_contacts: boolean;
         };
     };
     responses: never;
@@ -589,6 +613,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    aa_contacts_api_permissions_get_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserPermissionsSchema"];
+                };
             };
         };
     };

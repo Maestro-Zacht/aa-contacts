@@ -429,6 +429,30 @@
                     }
                 ]
             }
+        },
+        "/contacts/api/permissions/me": {
+            "get": {
+                "operationId": "aa_contacts_api_permissions_get_me",
+                "summary": "Get Me",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPermissionsSchema"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -622,6 +646,24 @@
                     "corporation_name"
                 ],
                 "title": "EveCorporationSchema",
+                "type": "object"
+            },
+            "UserPermissionsSchema": {
+                "properties": {
+                    "can_manage_alliance_contacts": {
+                        "title": "Can Manage Alliance Contacts",
+                        "type": "boolean"
+                    },
+                    "can_manage_corporation_contacts": {
+                        "title": "Can Manage Corporation Contacts",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_manage_alliance_contacts",
+                    "can_manage_corporation_contacts"
+                ],
+                "title": "UserPermissionsSchema",
                 "type": "object"
             }
         },

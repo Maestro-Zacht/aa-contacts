@@ -2,9 +2,11 @@ from datetime import datetime
 from typing import Optional
 from ninja import Schema, ModelSchema
 
+from django.contrib.auth.models import User
+
 from allianceauth.eveonline.models import EveCorporationInfo, EveAllianceInfo
 
-from aa_contacts.models import Contact
+from aa_contacts.models import Contact, AllianceContact, CorporationContact
 
 from allianceauth.services.hooks import get_extension_logger
 
@@ -53,20 +55,37 @@ class ContactLabelSchema(Schema):
 
 
 class ContactSchema(Schema):
+    id: int
     contact_id: int
     contact_type: Contact.ContactTypeOptions
     contact_logo_url: str
     contact_name: str
     standing: float
     notes: Optional[str] = None
+    can_edit_notes: bool
     labels: list[ContactLabelSchema] = []
 
     @staticmethod
     def resolve_notes(obj: Contact, context) -> Optional[str]:
-        user = context['request'].user
-        if user.has_perm('aa_contacts.view_contact_notes'):
+        user: User = context['request'].user
+        if (
+            (type(obj) is AllianceContact and user.has_perm('aa_contacts.view_alliance_notes'))
+            or (type(obj) is CorporationContact and user.has_perm('aa_contacts.view_corporation_notes'))
+        ):
             return obj.notes
 
     @staticmethod
     def resolve_contact_logo_url(obj: Contact) -> str:
         return obj.image_src.split('?')[0]
+
+    @staticmethod
+    def resolve_can_edit_notes(obj: Contact, context) -> bool:
+        user: User = context['request'].user
+        return (
+            (type(obj) is AllianceContact and user.has_perm('aa_contacts.manage_alliance_contacts'))
+            or (type(obj) is CorporationContact and user.has_perm('aa_contacts.manage_corporation_contacts'))
+        )
+
+
+class UpdateContactSchema(Schema):
+    notes: str

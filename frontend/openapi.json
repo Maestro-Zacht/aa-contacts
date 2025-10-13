@@ -163,6 +163,61 @@
                 ]
             }
         },
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}": {
+            "patch": {
+                "operationId": "aa_contacts_api_alliance_contacts_edit_contact",
+                "summary": "Edit Contact",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateContactSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/corporations/tokens/": {
             "get": {
                 "operationId": "aa_contacts_api_corporation_tokens_get_list",
@@ -319,6 +374,61 @@
                     }
                 ]
             }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}": {
+            "patch": {
+                "operationId": "aa_contacts_api_corporation_contacts_edit_contact",
+                "summary": "Edit Contact",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateContactSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -380,6 +490,10 @@
             },
             "ContactSchema": {
                 "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
                     "contact_id": {
                         "title": "Contact Id",
                         "type": "integer"
@@ -410,6 +524,10 @@
                         ],
                         "title": "Notes"
                     },
+                    "can_edit_notes": {
+                        "title": "Can Edit Notes",
+                        "type": "boolean"
+                    },
                     "labels": {
                         "default": [],
                         "items": {
@@ -420,11 +538,13 @@
                     }
                 },
                 "required": [
+                    "id",
                     "contact_id",
                     "contact_type",
                     "contact_logo_url",
                     "contact_name",
-                    "standing"
+                    "standing",
+                    "can_edit_notes"
                 ],
                 "title": "ContactSchema",
                 "type": "object"
@@ -438,6 +558,19 @@
                 ],
                 "title": "ContactTypeOptions",
                 "type": "string"
+            },
+            "UpdateContactSchema": {
+                "properties": {
+                    "notes": {
+                        "title": "Notes",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "notes"
+                ],
+                "title": "UpdateContactSchema",
+                "type": "object"
             },
             "CorporationTokenSchema": {
                 "properties": {

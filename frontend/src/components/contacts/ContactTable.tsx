@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, Badge, Image } from "react-bootstrap";
 import type { Api as DTApi } from 'datatables.net-bs5';
 import type { DataTableRef } from "datatables.net-react";
@@ -8,8 +8,9 @@ import Loading from "../Loading";
 import DataTable from "../tables/DataTableBase";
 import type { components } from "../../api/Schema";
 
-import { getAllianceContacts, getCorporationContacts } from "../../api/api";
+import { getAllianceContacts, getCorporationContacts, saveAllianceContactNotes, saveCorporationContactNotes } from "../../api/api";
 import { useEffect, useRef, useState } from "react";
+import ContactNotesModal from "./ContactNotesModal";
 
 
 interface ContactTableProps {
@@ -24,6 +25,7 @@ const columns = [
     { data: 'labels' },
     { data: 'standing' },
     { data: 'notes', visible: false },
+    { data: 'can_edit_notes', visible: false, orderable: false, searchable: false }
 ];
 
 export default function ContactTable({ entityType }: ContactTableProps) {
@@ -31,6 +33,26 @@ export default function ContactTable({ entityType }: ContactTableProps) {
     const entityId = parseInt(params[entityType === "Corporation" ? "corporationId" : "allianceId"] || "unknown");
     const tableRef = useRef<DataTableRef>(null);
     const [imagesLoaded, setImagesLoaded] = useState(0);
+
+    const queryClient = useQueryClient();
+
+    const invalidateQueries = async () => {
+        await queryClient.invalidateQueries({ queryKey: [entityType.toLowerCase(), entityId, 'contacts'] });
+    }
+
+    const notesMutation = useMutation({
+        mutationFn: ({ newNotes, contactPk }: { newNotes: string, contactPk: number }) => {
+            return entityType === "Corporation" ?
+                saveCorporationContactNotes(entityId, contactPk, newNotes) :
+                saveAllianceContactNotes(entityId, contactPk, newNotes);
+        },
+        onSuccess: async () => {
+            await invalidateQueries();
+        },
+        onError: async () => {
+            await invalidateQueries();
+        }
+    });
 
     const { data, isLoading, error } = useQuery({
         queryKey: [entityType.toLowerCase(), entityId, 'contacts'],
@@ -49,11 +71,17 @@ export default function ContactTable({ entityType }: ContactTableProps) {
     const handleNotesColumnVisibility = (e: { dt: DTApi }) => {
         if (contacts.length === 0) return;
 
-        const columnVisible = !(contacts[0].notes === undefined || contacts[0].notes === null);
+        const notesColumnVisible = !(contacts[0].notes === undefined || contacts[0].notes === null);
+        const editColumnVisible = contacts[0].can_edit_notes && notesColumnVisible;
 
-        if (columnVisible != e.dt.column(4).visible()) {
-            console.debug(`Notes column visibility toggled from ${e.dt.column(4).visible()} to ${columnVisible}`);
-            e.dt.column(4).visible(columnVisible);
+        if (notesColumnVisible != e.dt.column(4).visible()) {
+            console.debug(`Notes column visibility toggled from ${e.dt.column(4).visible()} to ${notesColumnVisible}`);
+            e.dt.column(4).visible(notesColumnVisible);
+        }
+
+        if (editColumnVisible != e.dt.column(5).visible()) {
+            console.debug(`Edit Notes column visibility toggled from ${e.dt.column(5).visible()} to ${editColumnVisible}`);
+            e.dt.column(5).visible(editColumnVisible);
         }
     }
 
@@ -91,6 +119,22 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
+    const renderEditNotes = (data: boolean, type: string, row: components["schemas"]["ContactSchema"]) => {
+        switch (type) {
+            case 'display':
+                // console.log(data);
+                return <>
+                    {data && <ContactNotesModal
+                        initialNotes={row.notes || ""}
+                        contactPk={row.id}
+                        mutation={notesMutation}
+                    />}
+                </>
+            default:
+                return data;
+        }
+    }
+
     useEffect(() => {
         if (imagesLoaded > 0 && imagesLoaded >= contacts.length) {
             tableRef.current?.dt()?.columns.adjust();
@@ -108,7 +152,8 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                         onPreDraw={handleNotesColumnVisibility}
                         slots={{
                             0: renderContactName,
-                            2: renderLabels
+                            2: renderLabels,
+                            5: renderEditNotes,
                         }}
                         ref={tableRef}
                         options={{
@@ -141,7 +186,23 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                             className: 'dtcc-row_no-top-padding',
                                             content: [],
                                         }
-                                    ]
+                                    ],
+                                },
+                                {
+                                    target: 5,
+                                    className: 'text-center',
+                                    columnControl: [
+                                        {
+                                            target: 'thead:0',
+                                            className: 'dtcc-row_no-bottom-border',
+                                            content: [],
+                                        },
+                                        {
+                                            target: 'thead:1',
+                                            className: 'dtcc-row_no-top-padding',
+                                            content: [],
+                                        }
+                                    ],
                                 }
                             ],
                             columnControl: [
@@ -172,6 +233,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                 <th>Labels</th>
                                 <th>Standings</th>
                                 <th>Notes</th>
+                                <th></th>
                             </tr>
                         </thead>
                     </DataTable>

@@ -88,3 +88,31 @@ export async function updateCorporationContacts(corporationId: number) {
         throw error;
     }
 }
+
+export async function saveAllianceContactNotes(allianceId: number, contactPk: number, notes: string) {
+    const { error } = await apiClient.PATCH(
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}",
+        {
+            params: { path: { alliance_id: allianceId, contact_pk: contactPk } },
+            body: { notes: notes }
+        }
+    )
+    if (error) {
+        console.error("Error saving alliance contact notes: ", error);
+        throw error;
+    }
+}
+
+export async function saveCorporationContactNotes(corporationId: number, contactPk: number, notes: string) {
+    const { error } = await apiClient.PATCH(
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}",
+        {
+            params: { path: { corporation_id: corporationId, contact_pk: contactPk } },
+            body: { notes: notes }
+        }
+    )
+    if (error) {
+        console.error("Error saving corporation contact notes: ", error);
+        throw error;
+    }
+}

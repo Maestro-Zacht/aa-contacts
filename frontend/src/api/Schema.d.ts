@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit Contact */
+        patch: operations["aa_contacts_api_alliance_contacts_edit_contact"];
+        trace?: never;
+    };
     "/contacts/api/corporations/tokens/": {
         parameters: {
             query?: never;
@@ -140,6 +157,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit Contact */
+        patch: operations["aa_contacts_api_corporation_contacts_edit_contact"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -169,6 +203,8 @@ export interface components {
         };
         /** ContactSchema */
         ContactSchema: {
+            /** Id */
+            id: number;
             /** Contact Id */
             contact_id: number;
             contact_type: components["schemas"]["ContactTypeOptions"];
@@ -180,6 +216,8 @@ export interface components {
             standing: number;
             /** Notes */
             notes?: string | null;
+            /** Can Edit Notes */
+            can_edit_notes: boolean;
             /**
              * Labels
              * @default []
@@ -191,6 +229,11 @@ export interface components {
          * @enum {string}
          */
         ContactTypeOptions: "character" | "corporation" | "alliance" | "faction";
+        /** UpdateContactSchema */
+        UpdateContactSchema: {
+            /** Notes */
+            notes: string;
+        };
         /** CorporationTokenSchema */
         CorporationTokenSchema: {
             /**
@@ -345,6 +388,45 @@ export interface operations {
             };
         };
     };
+    aa_contacts_api_alliance_contacts_edit_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     aa_contacts_api_corporation_tokens_get_list: {
         parameters: {
             query?: never;
@@ -447,6 +529,45 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_edit_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactSchema"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {

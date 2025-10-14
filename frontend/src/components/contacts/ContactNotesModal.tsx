@@ -17,7 +17,6 @@ export default function ContactNotesModal({ initialNotes, mutation, contactPk }:
 
     const handleClose = () => {
         setShowModal(false);
-        setNotes(initialNotes);
     };
 
     const handleSave = (notes: string) => {

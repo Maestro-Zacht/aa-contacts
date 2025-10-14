@@ -18,7 +18,7 @@
     "datatables.net-columncontrol-bs5": "^1.1.0",
     "datatables.net-react": "^1.0.1",
     "js-cookie": "^3.0.5",
-    "openapi-fetch": "^0.14.0",
+    "openapi-fetch": "^0.15.0",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.1",

@@ -10,6 +10,10 @@ updates:
     directory: '/frontend'
     schedule:
       interval: 'weekly'
+    groups:
+      tests:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: 'github-actions'

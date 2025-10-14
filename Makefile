@@ -17,3 +17,18 @@ compile_translations:
 dev:
 	@echo "Starting development server"
 	@cd frontend && npm run dev
+
+.PHONY: clean
+clean:
+	rm -rf dist/
+	rm -rf frontend/dist/
+
+.PHONY: buildjs
+buildjs:
+	cd frontend/; npm install; npm run build
+
+.PHONY: package
+package: buildjs
+	python -m pip install -U pip
+	pip install -U build
+	python -m build

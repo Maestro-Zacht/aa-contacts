@@ -1,0 +1,679 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "AA Contacts API",
+        "version": "0.0.1",
+        "description": ""
+    },
+    "paths": {
+        "/contacts/api/alliances/tokens/": {
+            "get": {
+                "operationId": "aa_contacts_api_alliance_tokens_get_list",
+                "summary": "Get List",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/AllianceTokenSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/alliances/tokens/{alliance_id}/": {
+            "get": {
+                "operationId": "aa_contacts_api_alliance_tokens_get_single",
+                "summary": "Get Single",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AllianceTokenSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/alliances/{alliance_id}/contacts/": {
+            "get": {
+                "operationId": "aa_contacts_api_alliance_contacts_list_contacts",
+                "summary": "List Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ContactSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/alliances/{alliance_id}/contacts/update": {
+            "post": {
+                "operationId": "aa_contacts_api_alliance_contacts_update_contacts",
+                "summary": "Update Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}": {
+            "patch": {
+                "operationId": "aa_contacts_api_alliance_contacts_edit_contact",
+                "summary": "Edit Contact",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateContactSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/tokens/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_tokens_get_list",
+                "summary": "Get List",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/CorporationTokenSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/tokens/{corporation_id}/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_tokens_get_single",
+                "summary": "Get Single",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CorporationTokenSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "tokens"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/": {
+            "get": {
+                "operationId": "aa_contacts_api_corporation_contacts_list_contacts",
+                "summary": "List Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/ContactSchema"
+                                    },
+                                    "title": "Response",
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/update": {
+            "post": {
+                "operationId": "aa_contacts_api_corporation_contacts_update_contacts",
+                "summary": "Update Contacts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}": {
+            "patch": {
+                "operationId": "aa_contacts_api_corporation_contacts_edit_contact",
+                "summary": "Edit Contact",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateContactSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/permissions/me": {
+            "get": {
+                "operationId": "aa_contacts_api_permissions_get_me",
+                "summary": "Get Me",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserPermissionsSchema"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AllianceTokenSchema": {
+                "properties": {
+                    "last_update": {
+                        "format": "date-time",
+                        "title": "Last Update",
+                        "type": "string"
+                    },
+                    "alliance": {
+                        "$ref": "#/components/schemas/EveAllianceSchema"
+                    }
+                },
+                "required": [
+                    "last_update",
+                    "alliance"
+                ],
+                "title": "AllianceTokenSchema",
+                "type": "object"
+            },
+            "EveAllianceSchema": {
+                "properties": {
+                    "logo_url": {
+                        "title": "Logo Url",
+                        "type": "string"
+                    },
+                    "alliance_id": {
+                        "title": "Alliance Id",
+                        "type": "integer"
+                    },
+                    "alliance_name": {
+                        "maxLength": 254,
+                        "title": "Alliance Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "logo_url",
+                    "alliance_id",
+                    "alliance_name"
+                ],
+                "title": "EveAllianceSchema",
+                "type": "object"
+            },
+            "ContactLabelSchema": {
+                "properties": {
+                    "label_name": {
+                        "title": "Label Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label_name"
+                ],
+                "title": "ContactLabelSchema",
+                "type": "object"
+            },
+            "ContactSchema": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "contact_id": {
+                        "title": "Contact Id",
+                        "type": "integer"
+                    },
+                    "contact_type": {
+                        "$ref": "#/components/schemas/ContactTypeOptions"
+                    },
+                    "contact_logo_url": {
+                        "title": "Contact Logo Url",
+                        "type": "string"
+                    },
+                    "contact_name": {
+                        "title": "Contact Name",
+                        "type": "string"
+                    },
+                    "standing": {
+                        "title": "Standing",
+                        "type": "number"
+                    },
+                    "notes": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Notes"
+                    },
+                    "can_edit_notes": {
+                        "title": "Can Edit Notes",
+                        "type": "boolean"
+                    },
+                    "labels": {
+                        "default": [],
+                        "items": {
+                            "$ref": "#/components/schemas/ContactLabelSchema"
+                        },
+                        "title": "Labels",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "id",
+                    "contact_id",
+                    "contact_type",
+                    "contact_logo_url",
+                    "contact_name",
+                    "standing",
+                    "can_edit_notes"
+                ],
+                "title": "ContactSchema",
+                "type": "object"
+            },
+            "ContactTypeOptions": {
+                "enum": [
+                    "character",
+                    "corporation",
+                    "alliance",
+                    "faction"
+                ],
+                "title": "ContactTypeOptions",
+                "type": "string"
+            },
+            "UpdateContactSchema": {
+                "properties": {
+                    "notes": {
+                        "title": "Notes",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "notes"
+                ],
+                "title": "UpdateContactSchema",
+                "type": "object"
+            },
+            "CorporationTokenSchema": {
+                "properties": {
+                    "last_update": {
+                        "format": "date-time",
+                        "title": "Last Update",
+                        "type": "string"
+                    },
+                    "corporation": {
+                        "$ref": "#/components/schemas/EveCorporationSchema"
+                    }
+                },
+                "required": [
+                    "last_update",
+                    "corporation"
+                ],
+                "title": "CorporationTokenSchema",
+                "type": "object"
+            },
+            "EveCorporationSchema": {
+                "properties": {
+                    "alliance": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EveAllianceSchema"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "logo_url": {
+                        "title": "Logo Url",
+                        "type": "string"
+                    },
+                    "corporation_id": {
+                        "title": "Corporation Id",
+                        "type": "integer"
+                    },
+                    "corporation_name": {
+                        "maxLength": 254,
+                        "title": "Corporation Name",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "logo_url",
+                    "corporation_id",
+                    "corporation_name"
+                ],
+                "title": "EveCorporationSchema",
+                "type": "object"
+            },
+            "UserPermissionsSchema": {
+                "properties": {
+                    "can_manage_alliance_contacts": {
+                        "title": "Can Manage Alliance Contacts",
+                        "type": "boolean"
+                    },
+                    "can_manage_corporation_contacts": {
+                        "title": "Can Manage Corporation Contacts",
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_manage_alliance_contacts",
+                    "can_manage_corporation_contacts"
+                ],
+                "title": "UserPermissionsSchema",
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "SessionAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            }
+        }
+    },
+    "servers": []
+}

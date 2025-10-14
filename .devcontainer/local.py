@@ -87,6 +87,7 @@ INSTALLED_APPS += [
 
     'aa_contacts',
 
+    'ninja',
     "debug_toolbar",
     'taskmonitor',
 
@@ -111,3 +112,7 @@ CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
 }
 
 # AA_CONTACTS_TASK_JITTER = 60
+
+CSRF_TRUSTED_ORIGINS += [
+    "http://localhost:3000",
+]

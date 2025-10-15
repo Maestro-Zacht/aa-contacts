@@ -73,10 +73,7 @@ class ContactSchema(Schema):
     @staticmethod
     def resolve_notes(obj: Contact, context) -> Optional[str]:
         user: User = context['request'].user
-        if (
-            (type(obj) is AllianceContact and user.has_perm('aa_contacts.view_alliance_notes'))
-            or (type(obj) is CorporationContact and user.has_perm('aa_contacts.view_corporation_notes'))
-        ):
+        if obj.can_view_notes(user):
             return obj.notes
 
     @staticmethod
@@ -86,10 +83,7 @@ class ContactSchema(Schema):
     @staticmethod
     def resolve_can_edit_notes(obj: Contact, context) -> bool:
         user: User = context['request'].user
-        return (
-            (type(obj) is AllianceContact and user.has_perm('aa_contacts.manage_alliance_contacts'))
-            or (type(obj) is CorporationContact and user.has_perm('aa_contacts.manage_corporation_contacts'))
-        )
+        return obj.can_edit_notes(user)
 
 
 class UpdateContactSchema(Schema):

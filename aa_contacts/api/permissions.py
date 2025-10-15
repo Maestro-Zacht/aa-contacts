@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 from .schema import UserPermissionsSchema
 
-router = Router()
+router = Router(tags=["permissions"])
 
 
 @router.get("/me", response=UserPermissionsSchema)

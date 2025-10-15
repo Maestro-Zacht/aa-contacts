@@ -231,6 +231,14 @@ class Contact(models.Model):
             .values_list('pk', flat=True)
         )
 
+    @classmethod
+    def can_view_notes(cls, user: User) -> bool:
+        raise NotImplementedError("Please implement in subclass")
+
+    @classmethod
+    def can_edit_notes(cls, user: User) -> bool:
+        raise NotImplementedError("Please implement in subclass")
+
 
 class ContactToken(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='+')
@@ -264,6 +272,14 @@ class AllianceContact(Contact):
 
     def __str__(self):
         return f"{self.alliance} - {self.contact_name}"
+
+    @classmethod
+    def can_view_notes(cls, user: User) -> bool:
+        return user.has_perm('aa_contacts.view_alliance_notes')
+
+    @classmethod
+    def can_edit_notes(cls, user: User) -> bool:
+        return user.has_perm('aa_contacts.manage_alliance_contacts') and cls.can_view_notes(user)
 
 
 class AllianceToken(ContactToken):
@@ -309,6 +325,14 @@ class CorporationContact(Contact):
 
     def __str__(self):
         return f"{self.corporation} - {self.contact_name}"
+
+    @classmethod
+    def can_view_notes(cls, user: User) -> bool:
+        return user.has_perm('aa_contacts.view_corporation_notes')
+
+    @classmethod
+    def can_edit_notes(cls, user: User) -> bool:
+        return user.has_perm('aa_contacts.manage_corporation_contacts') and cls.can_view_notes(user)
 
 
 class CorporationToken(ContactToken):

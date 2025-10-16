@@ -28,16 +28,21 @@ export default function AlliancesSection() {
                     :
                     <>
                         {
-                            allianceTokens.map(token => (
-                                <Col key={token.alliance.alliance_id} xs="auto" className="mx-5">
-                                    <TokenPortrait
-                                        imgUrl={token.alliance.logo_url}
-                                        name={token.alliance.alliance_name}
-                                        entityId={token.alliance.alliance_id}
-                                        entityType="Alliance"
-                                    />
+                            allianceTokens.length > 0 ?
+                                allianceTokens.map(token => (
+                                    <Col key={token.alliance.alliance_id} xs="auto" className="mx-5">
+                                        <TokenPortrait
+                                            imgUrl={token.alliance.logo_url}
+                                            name={token.alliance.alliance_name}
+                                            entityId={token.alliance.alliance_id}
+                                            entityType="Alliance"
+                                        />
+                                    </Col>
+                                ))
+                                :
+                                <Col xs="auto" className="mt-5">
+                                    <p>No alliance contact tokens found.</p>
                                 </Col>
-                            ))
                         }
                     </>
                 }

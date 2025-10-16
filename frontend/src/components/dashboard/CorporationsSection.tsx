@@ -27,16 +27,21 @@ export default function CorporationsSection() {
                     :
                     <>
                         {
-                            corporationTokens.map(token => (
-                                <Col key={token.corporation.corporation_id} xs="auto" className="mx-5">
-                                    <TokenPortrait
-                                        imgUrl={token.corporation.logo_url}
-                                        name={token.corporation.corporation_name}
-                                        entityId={token.corporation.corporation_id}
-                                        entityType="Corporation"
-                                    />
+                            corporationTokens.length > 0 ?
+                                corporationTokens.map(token => (
+                                    <Col key={token.corporation.corporation_id} xs="auto" className="mx-5">
+                                        <TokenPortrait
+                                            imgUrl={token.corporation.logo_url}
+                                            name={token.corporation.corporation_name}
+                                            entityId={token.corporation.corporation_id}
+                                            entityType="Corporation"
+                                        />
+                                    </Col>
+                                ))
+                                :
+                                <Col xs="auto" className="mt-5">
+                                    <p>No corporation contact tokens found.</p>
                                 </Col>
-                            ))
                         }
                     </>
                 }

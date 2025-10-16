@@ -92,7 +92,7 @@ def add_alliance_token(request, token: Token):
 
     if char.alliance_id is None:
         messages.error(request, _('You need to be in an alliance to add alliance contacts.'))
-        return redirect('aa_contacts:dashboard')
+        return redirect('aa_contacts:index')
 
     try:
         alliance = char.alliance
@@ -101,13 +101,13 @@ def add_alliance_token(request, token: Token):
 
     if AllianceToken.objects.filter(alliance=alliance).exists():
         messages.error(request, _('Alliance contacts for your alliance are already being tracked.'))
-        return redirect('aa_contacts:dashboard')
+        return redirect('aa_contacts:index')
 
     AllianceToken.objects.create(alliance=alliance, token=token)
     update_alliance_contacts.delay(alliance.alliance_id)
 
     messages.success(request, _('Alliance contacts are now being tracked.'))
-    return redirect('aa_contacts:dashboard')
+    return redirect('aa_contacts:index')
 
 
 @login_required
@@ -123,13 +123,13 @@ def add_corporation_token(request, token: Token):
 
     if CorporationToken.objects.filter(corporation=corporation).exists():
         messages.error(request, _('Corporation contacts for your corporation are already being tracked.'))
-        return redirect('aa_contacts:dashboard')
+        return redirect('aa_contacts:index')
 
     CorporationToken.objects.create(corporation=corporation, token=token)
     update_corporation_contacts.delay(corporation.corporation_id)
 
     messages.success(request, _('Corporation contacts are now being tracked.'))
-    return redirect('aa_contacts:dashboard')
+    return redirect('aa_contacts:index')
 
 
 @login_required

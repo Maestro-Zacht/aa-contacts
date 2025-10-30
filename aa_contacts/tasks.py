@@ -10,6 +10,7 @@ from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
 
 from esi.models import Token
+from esi.exceptions import HTTPNotModified
 
 from .app_settings import TASK_JITTER
 from .models import AllianceContact, AllianceContactLabel, AllianceToken, CorporationToken, CorporationContact, CorporationContactLabel
@@ -75,63 +76,78 @@ class BaseContactUpdater:
         entity = cls.get_entity_object(entity_id)
         entity_token = cls.get_entity_token(entity)
 
-        labels_data = cls.get_labels_data(entity_id, entity_token.token)
-        labels = {label.label_id: label.label_name for label in labels_data}
+        try:
+            labels_data = cls.get_labels_data(entity_id, entity_token.token)
+            labels = {label.label_id: label.label_name for label in labels_data}
+            update_labels = True
+        except HTTPNotModified:
+            update_labels = False
 
-        contacts_data = cls.get_contacts_data(entity_id, entity_token.token)
-        contact_ids = {
-            contact.contact_id: {
-                'contact_type': contact.contact_type,
-                'label_ids': contact.label_ids or [],
-                'standing': contact.standing
-            } for contact in contacts_data
-        }
+        try:
+            contacts_data = cls.get_contacts_data(entity_id, entity_token.token)
+            contact_ids = {
+                contact.contact_id: {
+                    'contact_type': contact.contact_type,
+                    'label_ids': contact.label_ids or [],
+                    'standing': contact.standing
+                } for contact in contacts_data
+            }
+            update_contacts = True
+        except HTTPNotModified:
+            update_contacts = False
 
         with transaction.atomic():
             label_objects = {}
 
-            cls.get_labels_model().objects.filter(
-                **cls.get_entity_selector(entity)
-            ).exclude(
-                label_id__in=labels.keys()
-            ).delete()
+            if update_labels:
+                cls.get_labels_model().objects.filter(
+                    **cls.get_entity_selector(entity)
+                ).exclude(
+                    label_id__in=labels.keys()
+                ).delete()
 
-            for label_id, label_name in labels.items():
-                label, _ = cls.get_labels_model().objects.update_or_create(
-                    **cls.get_entity_selector(entity),
-                    label_id=label_id,
-                    defaults={'label_name': label_name}
+                for label_id, label_name in labels.items():
+                    label, _ = cls.get_labels_model().objects.update_or_create(
+                        **cls.get_entity_selector(entity),
+                        label_id=label_id,
+                        defaults={'label_name': label_name}
+                    )
+
+                    label_objects[label_id] = label
+            elif update_contacts:
+                existing_labels = cls.get_labels_model().objects.filter(
+                    **cls.get_entity_selector(entity)
+                )
+                label_objects = {label.label_id: label for label in existing_labels}
+
+            if update_contacts:
+                missing_contacts = cls.get_contacts_model().objects.filter(
+                    **cls.get_entity_selector(entity)
+                ).exclude(
+                    contact_id__in=contact_ids.keys()
                 )
 
-                label_objects[label_id] = label
+                missing_contacts.filter(notes='').delete()
+                cls.get_contacts_model().labels.through.objects.filter(
+                    **cls.get_labels_related_selector(missing_contacts.values('pk'))
+                ).delete()
+                missing_contacts.update(standing=0.0)
 
-            missing_contacts = cls.get_contacts_model().objects.filter(
-                **cls.get_entity_selector(entity)
-            ).exclude(
-                contact_id__in=contact_ids.keys()
-            )
+                for contact_id, contact_data in contact_ids.items():
+                    contact, _ = cls.get_contacts_model().objects.update_or_create(
+                        **cls.get_entity_selector(entity),
+                        contact_id=contact_id,
+                        defaults={
+                            'contact_type': contact_data['contact_type'],
+                            'standing': contact_data['standing']
+                        }
+                    )
 
-            missing_contacts.filter(notes='').delete()
-            cls.get_contacts_model().labels.through.objects.filter(
-                **cls.get_labels_related_selector(missing_contacts.values('pk'))
-            ).delete()
-            missing_contacts.update(standing=0.0)
+                    contact.labels.clear()
+                    if contact_data['label_ids'] is not None:
+                        contact.labels.set([label_objects[label_id] for label_id in contact_data['label_ids']])
 
-            for contact_id, contact_data in contact_ids.items():
-                contact, _ = cls.get_contacts_model().objects.update_or_create(
-                    **cls.get_entity_selector(entity),
-                    contact_id=contact_id,
-                    defaults={
-                        'contact_type': contact_data['contact_type'],
-                        'standing': contact_data['standing']
-                    }
-                )
-
-                contact.labels.clear()
-                if contact_data['label_ids'] is not None:
-                    contact.labels.set([labels[label_id] for label_id in contact_data['label_ids']])
-
-                contacts_to_load.append(contact.pk)
+                    contacts_to_load.append(contact.pk)
 
             entity_token.last_update = timezone.now()
             entity_token.save()

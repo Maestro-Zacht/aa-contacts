@@ -78,13 +78,17 @@ class BaseContactUpdater:
 
         try:
             labels_data = cls.get_labels_data(entity_id, entity_token.token)
-            labels = {label.label_id: label.label_name for label in labels_data}
-            update_labels = True
         except HTTPNotModified:
             update_labels = False
+        else:
+            labels = {label.label_id: label.label_name for label in labels_data}
+            update_labels = True
 
         try:
             contacts_data = cls.get_contacts_data(entity_id, entity_token.token)
+        except HTTPNotModified:
+            update_contacts = False
+        else:
             contact_ids = {
                 contact.contact_id: {
                     'contact_type': contact.contact_type,
@@ -93,8 +97,6 @@ class BaseContactUpdater:
                 } for contact in contacts_data
             }
             update_contacts = True
-        except HTTPNotModified:
-            update_contacts = False
 
         with transaction.atomic():
             label_objects = {}

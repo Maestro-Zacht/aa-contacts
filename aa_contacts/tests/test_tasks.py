@@ -1,11 +1,14 @@
 from unittest.mock import patch
 from django.test import TestCase
 
+from esi.exceptions import HTTPNotModified
+
 from app_utils.testdata_factories import UserMainFactory
-from app_utils.esi_testing import EsiClientStub, EsiEndpoint
 
 from ..models import AllianceToken, AllianceContactLabel, AllianceContact, CorporationContact, CorporationContactLabel, CorporationToken
 from ..tasks import update_alliance_contacts, update_corporation_contacts
+
+from .utils import SimpleAttributeDict
 
 
 class TestUpdateAllianceContacts(TestCase):
@@ -21,23 +24,19 @@ class TestUpdateAllianceContacts(TestCase):
             token=token
         )
 
-        cls.label_data = {
-            str(cls.alliance.alliance_id): [
-                {"label_id": 1, "label_name": "Test Label 1"},
-                {"label_id": 2, "label_name": "Test Label 2"},
-            ]
-        }
+        cls.label_data = [
+            SimpleAttributeDict({"label_id": 1, "label_name": "Test Label 1"}),
+            SimpleAttributeDict({"label_id": 2, "label_name": "Test Label 2"}),
+        ]
 
-        cls.contact_data = {
-            str(cls.alliance.alliance_id): [
-                {
-                    "contact_id": 2,
-                    "contact_type": "corporation",
-                    'label_ids': [1, 2],
-                    'standing': 5.0
-                },
-            ]
-        }
+        cls.contact_data = [
+            SimpleAttributeDict({
+                "contact_id": 2,
+                "contact_type": "corporation",
+                'label_ids': [1, 2],
+                'standing': 5.0
+            }),
+        ]
 
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
     def test_token_doesnt_exist(self, mock_with_valid_tokens):
@@ -47,75 +46,47 @@ class TestUpdateAllianceContacts(TestCase):
         with self.assertRaises(ValueError):
             update_alliance_contacts(self.alliance.alliance_id)
 
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_contacts_data")
     @patch("aa_contacts.tasks.group.delay")
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
-    @patch("aa_contacts.tasks.esi")
-    def test_ok(self, mock_esi, mock_with_valid_tokens, mock_delay):
+    def test_ok(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
         mock_with_valid_tokens.return_value = AllianceToken.objects.all()
         mock_delay.return_value = None
 
-        labels_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_alliances_alliance_id_contacts_labels',
-            'alliance_id',
-            needs_token=True,
-            data=self.label_data
-        )
-
-        contacts_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_alliances_alliance_id_contacts',
-            'alliance_id',
-            needs_token=True,
-            data=self.contact_data
-        )
-
-        mock_esi.client = EsiClientStub.create_from_endpoints([labels_endpoint, contacts_endpoint])
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.return_value = self.contact_data
 
         update_alliance_contacts(self.alliance.alliance_id)
 
         self.assertEqual(AllianceContact.objects.count(), 1)
         self.assertEqual(AllianceContactLabel.objects.count(), 2)
 
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_contacts_data")
     @patch("aa_contacts.tasks.group.delay")
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
-    @patch("aa_contacts.tasks.esi")
-    def test_update(self, mock_esi, mock_with_valid_tokens, mock_delay):
+    def test_update(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
         mock_with_valid_tokens.return_value = AllianceToken.objects.all()
         mock_delay.return_value = None
 
-        labels_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_alliances_alliance_id_contacts_labels',
-            'alliance_id',
-            needs_token=True,
-            data=self.label_data
-        )
-
-        contacts_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_alliances_alliance_id_contacts',
-            'alliance_id',
-            needs_token=True,
-            data=self.contact_data
-        )
-
-        mock_esi.client = EsiClientStub.create_from_endpoints([labels_endpoint, contacts_endpoint])
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.return_value = self.contact_data
 
         update_alliance_contacts(self.alliance.alliance_id)
 
         self.assertEqual(AllianceContact.objects.count(), 1)
         self.assertEqual(AllianceContactLabel.objects.count(), 2)
 
-        self.label_data[str(self.alliance.alliance_id)].pop()
-        self.contact_data[str(self.alliance.alliance_id)][0]['label_ids'].pop()
+        self.label_data.pop()
+        self.contact_data[0]['label_ids'].pop()
 
         update_alliance_contacts(self.alliance.alliance_id)
 
         self.assertEqual(AllianceContact.objects.count(), 1)
         self.assertEqual(AllianceContactLabel.objects.count(), 1)
 
-        self.contact_data[str(self.alliance.alliance_id)] = []
+        mock_get_contacts_data.return_value = []
 
         contact = AllianceContact.objects.first()
         contact.notes = "Test"
@@ -135,6 +106,134 @@ class TestUpdateAllianceContacts(TestCase):
 
         self.assertEqual(AllianceContact.objects.count(), 0)
 
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_labels_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = AllianceToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
+        mock_get_contacts_data.return_value = self.contact_data
+
+        AllianceContactLabel.objects.bulk_create([
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=1,
+                label_name="I am Groot 1",
+            ),
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=2,
+                label_name="I am Groot 2",
+            ),
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=3,
+                label_name="I am Groot 3",
+            ),
+        ])
+
+        update_alliance_contacts(self.alliance.alliance_id)
+
+        self.assertEqual(AllianceContact.objects.count(), 1)
+        self.assertEqual(AllianceContactLabel.objects.count(), 3)
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=1).label_name,
+            "I am Groot 1"
+        )
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=2).label_name,
+            "I am Groot 2"
+        )
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=3).label_name,
+            "I am Groot 3"
+        )
+
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_contacts_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = AllianceToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
+
+        AllianceContact.objects.create(
+            alliance=self.alliance,
+            contact_id=3,
+            contact_type="corporation",
+            standing=3.0,
+        )
+
+        update_alliance_contacts(self.alliance.alliance_id)
+
+        self.assertEqual(AllianceContact.objects.count(), 1)
+        self.assertEqual(AllianceContactLabel.objects.count(), 2)
+
+        contact = AllianceContact.objects.first()
+        self.assertEqual(contact.contact_id, 3)
+
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.AllianceContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_both_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = AllianceToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
+        mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
+
+        labels = AllianceContactLabel.objects.bulk_create([
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=1,
+                label_name="I am Groot 1",
+            ),
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=2,
+                label_name="I am Groot 2",
+            ),
+            AllianceContactLabel(
+                alliance=self.alliance,
+                label_id=3,
+                label_name="I am Groot 3",
+            ),
+        ])
+
+        contact: AllianceContact = AllianceContact.objects.create(
+            alliance=self.alliance,
+            contact_id=3,
+            contact_type="corporation",
+            standing=3.0,
+        )
+        contact.labels.add(*labels)
+
+        update_alliance_contacts(self.alliance.alliance_id)
+        self.assertEqual(AllianceContact.objects.count(), 1)
+        self.assertEqual(AllianceContactLabel.objects.count(), 3)
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=1).label_name,
+            "I am Groot 1"
+        )
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=2).label_name,
+            "I am Groot 2"
+        )
+        self.assertEqual(
+            AllianceContactLabel.objects.get(alliance=self.alliance, label_id=3).label_name,
+            "I am Groot 3"
+        )
+
+        contact.refresh_from_db()
+        self.assertEqual(contact.contact_id, 3)
+
 
 class TestUpdateCorporationContacts(TestCase):
 
@@ -149,23 +248,19 @@ class TestUpdateCorporationContacts(TestCase):
             token=token
         )
 
-        cls.label_data = {
-            str(cls.corporation.corporation_id): [
-                {"label_id": 1, "label_name": "Test Label 1"},
-                {"label_id": 2, "label_name": "Test Label 2"},
-            ]
-        }
+        cls.label_data = [
+            SimpleAttributeDict({"label_id": 1, "label_name": "Test Label 1"}),
+            SimpleAttributeDict({"label_id": 2, "label_name": "Test Label 2"}),
+        ]
 
-        cls.contact_data = {
-            str(cls.corporation.corporation_id): [
-                {
-                    "contact_id": 2,
-                    "contact_type": "alliance",
-                    'label_ids': [1, 2],
-                    'standing': 5.0
-                },
-            ]
-        }
+        cls.contact_data = [
+            SimpleAttributeDict({
+                "contact_id": 2,
+                "contact_type": "alliance",
+                'label_ids': [1, 2],
+                'standing': 5.0
+            }),
+        ]
 
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
     def test_token_doesnt_exist(self, mock_with_valid_tokens):
@@ -175,75 +270,47 @@ class TestUpdateCorporationContacts(TestCase):
         with self.assertRaises(ValueError):
             update_corporation_contacts(self.corporation.corporation_id)
 
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_contacts_data")
     @patch("aa_contacts.tasks.group.delay")
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
-    @patch("aa_contacts.tasks.esi")
-    def test_ok(self, mock_esi, mock_with_valid_tokens, mock_delay):
+    def test_ok(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
         mock_with_valid_tokens.return_value = CorporationToken.objects.all()
         mock_delay.return_value = None
 
-        labels_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_corporations_corporation_id_contacts_labels',
-            'corporation_id',
-            needs_token=True,
-            data=self.label_data
-        )
-
-        contacts_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_corporations_corporation_id_contacts',
-            'corporation_id',
-            needs_token=True,
-            data=self.contact_data
-        )
-
-        mock_esi.client = EsiClientStub.create_from_endpoints([labels_endpoint, contacts_endpoint])
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.return_value = self.contact_data
 
         update_corporation_contacts(self.corporation.corporation_id)
 
         self.assertEqual(CorporationContact.objects.count(), 1)
         self.assertEqual(CorporationContactLabel.objects.count(), 2)
 
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_contacts_data")
     @patch("aa_contacts.tasks.group.delay")
     @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
-    @patch("aa_contacts.tasks.esi")
-    def test_update(self, mock_esi, mock_with_valid_tokens, mock_delay):
+    def test_update(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
         mock_with_valid_tokens.return_value = CorporationToken.objects.all()
         mock_delay.return_value = None
 
-        labels_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_corporations_corporation_id_contacts_labels',
-            'corporation_id',
-            needs_token=True,
-            data=self.label_data
-        )
-
-        contacts_endpoint = EsiEndpoint(
-            'Contacts',
-            'get_corporations_corporation_id_contacts',
-            'corporation_id',
-            needs_token=True,
-            data=self.contact_data
-        )
-
-        mock_esi.client = EsiClientStub.create_from_endpoints([labels_endpoint, contacts_endpoint])
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.return_value = self.contact_data
 
         update_corporation_contacts(self.corporation.corporation_id)
 
         self.assertEqual(CorporationContact.objects.count(), 1)
         self.assertEqual(CorporationContactLabel.objects.count(), 2)
 
-        self.label_data[str(self.corporation.corporation_id)].pop()
-        self.contact_data[str(self.corporation.corporation_id)][0]['label_ids'].pop()
+        self.label_data.pop()
+        self.contact_data[0]['label_ids'].pop()
 
         update_corporation_contacts(self.corporation.corporation_id)
 
         self.assertEqual(CorporationContact.objects.count(), 1)
         self.assertEqual(CorporationContactLabel.objects.count(), 1)
 
-        self.contact_data[str(self.corporation.corporation_id)] = []
+        mock_get_contacts_data.return_value = []
 
         contact = CorporationContact.objects.first()
         contact.notes = "Test"
@@ -262,3 +329,131 @@ class TestUpdateCorporationContacts(TestCase):
         update_corporation_contacts(self.corporation.corporation_id)
 
         self.assertEqual(CorporationContact.objects.count(), 0)
+
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_labels_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = CorporationToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
+        mock_get_contacts_data.return_value = self.contact_data
+
+        CorporationContactLabel.objects.bulk_create([
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=1,
+                label_name="I am Groot 1",
+            ),
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=2,
+                label_name="I am Groot 2",
+            ),
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=3,
+                label_name="I am Groot 3",
+            ),
+        ])
+
+        update_corporation_contacts(self.corporation.corporation_id)
+
+        self.assertEqual(CorporationContact.objects.count(), 1)
+        self.assertEqual(CorporationContactLabel.objects.count(), 3)
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=1).label_name,
+            "I am Groot 1"
+        )
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=2).label_name,
+            "I am Groot 2"
+        )
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=3).label_name,
+            "I am Groot 3"
+        )
+
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_contacts_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = CorporationToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.return_value = self.label_data
+        mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
+
+        CorporationContact.objects.create(
+            corporation=self.corporation,
+            contact_id=3,
+            contact_type="alliance",
+            standing=3.0,
+        )
+
+        update_corporation_contacts(self.corporation.corporation_id)
+
+        self.assertEqual(CorporationContact.objects.count(), 1)
+        self.assertEqual(CorporationContactLabel.objects.count(), 2)
+
+        contact = CorporationContact.objects.first()
+        self.assertEqual(contact.contact_id, 3)
+
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")
+    @patch("aa_contacts.tasks.CorporationContactUpdater.get_contacts_data")
+    @patch("aa_contacts.tasks.group.delay")
+    @patch("aa_contacts.models.ContactTokenQueryset.with_valid_tokens")
+    def test_both_not_modified(self, mock_with_valid_tokens, mock_delay, mock_get_contacts_data, mock_get_labels_data):
+        mock_with_valid_tokens.return_value = CorporationToken.objects.all()
+        mock_delay.return_value = None
+
+        mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
+        mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
+
+        labels = CorporationContactLabel.objects.bulk_create([
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=1,
+                label_name="I am Groot 1",
+            ),
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=2,
+                label_name="I am Groot 2",
+            ),
+            CorporationContactLabel(
+                corporation=self.corporation,
+                label_id=3,
+                label_name="I am Groot 3",
+            ),
+        ])
+
+        contact: CorporationContact = CorporationContact.objects.create(
+            corporation=self.corporation,
+            contact_id=3,
+            contact_type="alliance",
+            standing=3.0,
+        )
+        contact.labels.add(*labels)
+
+        update_corporation_contacts(self.corporation.corporation_id)
+        self.assertEqual(CorporationContact.objects.count(), 1)
+        self.assertEqual(CorporationContactLabel.objects.count(), 3)
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=1).label_name,
+            "I am Groot 1"
+        )
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=2).label_name,
+            "I am Groot 2"
+        )
+        self.assertEqual(
+            CorporationContactLabel.objects.get(corporation=self.corporation, label_id=3).label_name,
+            "I am Groot 3"
+        )
+
+        contact.refresh_from_db()
+        self.assertEqual(contact.contact_id, 3)

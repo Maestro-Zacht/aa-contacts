@@ -413,7 +413,7 @@ class TestUpdateCorporationContacts(TestCase):
         mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
         mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
 
-        labels = CorporationContactLabel.objects.bulk_create([
+        CorporationContactLabel.objects.bulk_create([
             CorporationContactLabel(
                 corporation=self.corporation,
                 label_id=1,
@@ -437,7 +437,7 @@ class TestUpdateCorporationContacts(TestCase):
             contact_type="alliance",
             standing=3.0,
         )
-        contact.labels.add(*labels)
+        contact.labels.add(CorporationContactLabel.objects.all())
 
         update_corporation_contacts(self.corporation.corporation_id)
         self.assertEqual(CorporationContact.objects.count(), 1)

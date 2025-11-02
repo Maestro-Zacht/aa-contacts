@@ -40,7 +40,7 @@ requires-python = "~=3.10"
 dependencies = [
     "allianceauth~=4.6",
 	"allianceauth-app-utils~=1.14",
-	"django-esi>=8.0.0b1",
+	"django-esi>=8.0.0b2",
 	"django-ninja~=1.4",
 ]
 

@@ -413,28 +413,34 @@ class TestUpdateCorporationContacts(TestCase):
         mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
         mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
 
-        label1 = CorporationContactLabel.objects.create(
+        label1 = CorporationContactLabel(
             corporation=self.corporation,
             label_id=1,
             label_name="I am Groot 1",
         )
-        label2 = CorporationContactLabel.objects.create(
+        label1.save()
+
+        label2 = CorporationContactLabel(
             corporation=self.corporation,
             label_id=2,
             label_name="I am Groot 2",
         )
-        label3 = CorporationContactLabel.objects.create(
+        label2.save()
+
+        label3 = CorporationContactLabel(
             corporation=self.corporation,
             label_id=3,
             label_name="I am Groot 3",
         )
+        label3.save()
 
-        contact: CorporationContact = CorporationContact.objects.create(
+        contact: CorporationContact = CorporationContact(
             corporation=self.corporation,
             contact_id=3,
             contact_type="alliance",
             standing=3.0,
         )
+        contact.save()
         contact.labels.add(label1, label2, label3)
 
         update_corporation_contacts(self.corporation.corporation_id)

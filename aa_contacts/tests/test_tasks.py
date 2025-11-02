@@ -189,31 +189,35 @@ class TestUpdateAllianceContacts(TestCase):
         mock_get_labels_data.side_effect = HTTPNotModified(status_code=304, headers={})
         mock_get_contacts_data.side_effect = HTTPNotModified(status_code=304, headers={})
 
-        labels = AllianceContactLabel.objects.bulk_create([
-            AllianceContactLabel(
-                alliance=self.alliance,
-                label_id=1,
-                label_name="I am Groot 1",
-            ),
-            AllianceContactLabel(
-                alliance=self.alliance,
-                label_id=2,
-                label_name="I am Groot 2",
-            ),
-            AllianceContactLabel(
-                alliance=self.alliance,
-                label_id=3,
-                label_name="I am Groot 3",
-            ),
-        ])
+        label1 = AllianceContactLabel(
+            alliance=self.alliance,
+            label_id=1,
+            label_name="I am Groot 1",
+        )
+        label1.save()
 
-        contact: AllianceContact = AllianceContact.objects.create(
+        label2 = AllianceContactLabel(
+            alliance=self.alliance,
+            label_id=2,
+            label_name="I am Groot 2",
+        )
+        label2.save()
+
+        label3 = AllianceContactLabel(
+            alliance=self.alliance,
+            label_id=3,
+            label_name="I am Groot 3",
+        )
+        label3.save()
+
+        contact: AllianceContact = AllianceContact(
             alliance=self.alliance,
             contact_id=3,
             contact_type="corporation",
             standing=3.0,
         )
-        contact.labels.add(*labels)
+        contact.save()
+        contact.labels.add(label1, label2, label3)
 
         update_alliance_contacts(self.alliance.alliance_id)
         self.assertEqual(AllianceContact.objects.count(), 1)

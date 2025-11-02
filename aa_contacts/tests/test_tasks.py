@@ -437,7 +437,7 @@ class TestUpdateCorporationContacts(TestCase):
             contact_type="alliance",
             standing=3.0,
         )
-        contact.labels.add(CorporationContactLabel.objects.all())
+        contact.labels.add(*CorporationContactLabel.objects.all())
 
         update_corporation_contacts(self.corporation.corporation_id)
         self.assertEqual(CorporationContact.objects.count(), 1)

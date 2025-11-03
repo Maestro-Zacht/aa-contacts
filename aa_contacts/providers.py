@@ -4,7 +4,7 @@ from . import (
     __version__ as app_version,
     __app_name_ua__ as app_name_ua,
     __github_url__ as github_url,
-    __esi_compatibility_date__ as esi_compatibility_date
+    __esi_compatibility_date__ as esi_compatibility_date,
 )
 
 esi = ESIClientProvider(
@@ -12,5 +12,10 @@ esi = ESIClientProvider(
     ua_appname=app_name_ua,
     ua_version=app_version,
     ua_url=github_url,
-    tags=["Contacts"]
+    operations=[
+        "GetAlliancesAllianceIdContacts",
+        "GetAlliancesAllianceIdContactsLabels",
+        "GetCorporationsCorporationIdContacts",
+        "GetCorporationsCorporationIdContactsLabels",
+    ],
 )

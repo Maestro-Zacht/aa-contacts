@@ -156,3 +156,4 @@ cython_debug/
 #.idea/
 
 mysql-data/
+aa_contacts/static/aa_contacts/react

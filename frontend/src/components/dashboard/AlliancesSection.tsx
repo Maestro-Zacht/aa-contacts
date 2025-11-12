@@ -3,9 +3,11 @@ import { getAllianceContactTokens } from "../../api/api";
 import { Col, Container, Row } from "react-bootstrap";
 import Loading from "../Loading";
 import TokenPortrait from "./TokenPortrait";
+import { useTranslation } from "react-i18next";
 
 
 export default function AlliancesSection() {
+    const { t } = useTranslation();
     const { data, isLoading, error } = useQuery({
         queryKey: ['alliances', 'tokens'],
         queryFn: getAllianceContactTokens,
@@ -13,7 +15,7 @@ export default function AlliancesSection() {
 
     if (error) {
         console.error(error);
-        return <p>Error loading alliance contact tokens. Contact administrators</p>;
+        return <p>{t("alliance.loading.error")}</p>;
     }
 
     const allianceTokens = data || [];
@@ -41,7 +43,7 @@ export default function AlliancesSection() {
                                 ))
                                 :
                                 <Col xs="auto" className="mt-5">
-                                    <p>No alliance contact tokens found.</p>
+                                    <p>{t("alliance.token.missing")}</p>
                                 </Col>
                         }
                     </>

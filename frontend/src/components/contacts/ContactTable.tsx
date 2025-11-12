@@ -11,6 +11,7 @@ import type { components } from "../../api/Schema";
 import { getAllianceContacts, getCorporationContacts, saveAllianceContactNotes, saveCorporationContactNotes } from "../../api/api";
 import { useEffect, useRef, useState } from "react";
 import ContactNotesModal from "./ContactNotesModal";
+import { useTranslation } from "react-i18next";
 
 
 interface ContactTableProps {
@@ -29,6 +30,7 @@ const columns = [
 ];
 
 export default function ContactTable({ entityType }: ContactTableProps) {
+    const { t } = useTranslation();
     const params = useParams();
     const entityId = parseInt(params[entityType === "Corporation" ? "corporationId" : "allianceId"] || "unknown");
     const tableRef = useRef<DataTableRef>(null);
@@ -63,7 +65,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
 
     if (error) {
         console.error(error);
-        return <p>Error loading contacts. Contact administrators</p>;
+        return <p>{t("contact.loading.error")}</p>;
     }
 
     const contacts = data || emptyContacts;
@@ -170,7 +172,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                                 ['orderAddAsc', 'orderAddDesc', 'orderRemove', 'orderClear'],
                                                 {
                                                     extend: 'dropdown',
-                                                    text: 'Search',
+                                                    text: t('search'),
                                                     icon: 'search',
                                                     content: [
                                                         {
@@ -228,11 +230,11 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                     >
                         <thead>
                             <tr>
-                                <th>Contact</th>
-                                <th>Contact Type</th>
-                                <th>Labels</th>
-                                <th>Standings</th>
-                                <th>Notes</th>
+                                <th>{t('contact.word', { count: 1 })}</th>
+                                <th>{t('contact.type')}</th>
+                                <th>{t('label.word', { count: 2 })}</th>
+                                <th>{t('standings')}</th>
+                                <th>{t('notes')}</th>
                                 <th></th>
                             </tr>
                         </thead>

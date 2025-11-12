@@ -1,0 +1,69 @@
+{
+  "alliance": {
+    "info": {
+      "loading": {
+        "error": ""
+      }
+    },
+    "loading": {
+      "error": ""
+    },
+    "token": {
+      "add": "",
+      "missing": ""
+    },
+    "unknown": "",
+    "word_one": "",
+    "word_many": "",
+    "word_other": ""
+  },
+  "close": "",
+  "contact": {
+    "for": "",
+    "loading": {
+      "error": ""
+    },
+    "save": {
+      "error": ""
+    },
+    "type": "",
+    "word_one": "",
+    "word_many": "",
+    "word_other": ""
+  },
+  "corporation": {
+    "info": {
+      "loading": {
+        "error": ""
+      }
+    },
+    "loading": {
+      "error": ""
+    },
+    "token": {
+      "add": "",
+      "missing": ""
+    },
+    "unknown": "",
+    "word_one": "",
+    "word_many": "",
+    "word_other": ""
+  },
+  "error": "",
+  "error!": "",
+  "info": "",
+  "label": {
+    "word_one": "",
+    "word_many": "",
+    "word_other": ""
+  },
+  "last_updated": "",
+  "loading": "",
+  "notes": "",
+  "notes_edit": "",
+  "save": "",
+  "search": "",
+  "standings": "",
+  "unknown": "",
+  "update": ""
+}

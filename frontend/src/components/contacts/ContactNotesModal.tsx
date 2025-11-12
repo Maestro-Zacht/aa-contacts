@@ -1,6 +1,7 @@
 import { type UseMutationResult } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button, FloatingLabel, Form, Modal } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 interface ContactNotesModalProps {
     initialNotes: string;
@@ -12,6 +13,7 @@ interface ContactNotesModalProps {
 }
 
 export default function ContactNotesModal({ initialNotes, mutation, contactPk }: ContactNotesModalProps) {
+    const { t } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [notes, setNotes] = useState(initialNotes);
 
@@ -29,7 +31,7 @@ export default function ContactNotesModal({ initialNotes, mutation, contactPk }:
                 },
                 onError: (error) => {
                     console.error("Error saving contact notes: ", error);
-                    alert("Error saving contact notes. Contact an administrator.");
+                    alert(t("contact.save.error"));
                     handleClose();
                 }
             }
@@ -43,14 +45,14 @@ export default function ContactNotesModal({ initialNotes, mutation, contactPk }:
             </Button>
             <Modal show={showModal} onHide={handleClose} size="lg" backdrop="static">
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit Notes</Modal.Title>
+                    <Modal.Title>{t("notes_edit")}</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     <Form>
                         <FloatingLabel
                             controlId="notesInput"
-                            label="Notes"
+                            label={t("notes")}
                             className="mb-3"
                         >
                             <Form.Control
@@ -65,8 +67,8 @@ export default function ContactNotesModal({ initialNotes, mutation, contactPk }:
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    <Button variant="primary" onClick={() => { handleSave(notes); }}>Save</Button>
+                    <Button variant="secondary" onClick={handleClose}>{t("close")}</Button>
+                    <Button variant="primary" onClick={() => { handleSave(notes); }}>{t("save")}</Button>
                 </Modal.Footer>
             </Modal>
         </>

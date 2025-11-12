@@ -1,0 +1,65 @@
+{
+  "alliance": {
+    "info": {
+      "loading": {
+        "error": "Error loading alliance info. Contact administrators"
+      }
+    },
+    "loading": {
+      "error": "Error loading alliance contact tokens. Contact administrators"
+    },
+    "token": {
+      "add": "Add Alliance Token",
+      "missing": "No alliance contact tokens found."
+    },
+    "unknown": "Unknown Alliance",
+    "word_one": "Alliance",
+    "word_other": "Alliances"
+  },
+  "close": "Close",
+  "contact": {
+    "for": "{{name}} Contacts",
+    "loading": {
+      "error": "Error loading contacts. Contact administrators"
+    },
+    "save": {
+      "error": "Error saving contact notes. Contact an administrator."
+    },
+    "type": "Contact Type",
+    "word_one": "Contact",
+    "word_other": "Contacts"
+  },
+  "corporation": {
+    "info": {
+      "loading": {
+        "error": "Error loading corporation info. Contact administrators"
+      }
+    },
+    "loading": {
+      "error": "Error loading corporation contact tokens. Contact administrators"
+    },
+    "token": {
+      "add": "Add Corporation Token",
+      "missing": "No corporation contact tokens found."
+    },
+    "unknown": "Unknown Corporation",
+    "word_one": "Corporation",
+    "word_other": "Corporations"
+  },
+  "error": "Error {{code}}",
+  "error!": "Error!",
+  "info": "Info",
+  "label": {
+    "word_one": "Label",
+    "word_other": "Labels"
+  },
+  "last_updated": "Last Updated:",
+  "loading": "Loading...",
+  "notes": "Notes",
+  "notes_edit": "Edit Notes",
+  "save": "Save",
+  "search": "Search",
+  "standings": "Standings",
+  "unknown": "Unknown",
+  "update": "Update"
+}

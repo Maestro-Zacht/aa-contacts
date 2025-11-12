@@ -3,8 +3,10 @@ import { Col, Container, Row } from "react-bootstrap";
 import Loading from "../Loading";
 import TokenPortrait from "./TokenPortrait";
 import { getCorporationContactTokens } from "../../api/api";
+import { useTranslation } from "react-i18next";
 
 export default function CorporationsSection() {
+    const { t } = useTranslation();
     const { data, isLoading, error } = useQuery({
         queryKey: ['corporations', 'tokens'],
         queryFn: getCorporationContactTokens,
@@ -12,7 +14,7 @@ export default function CorporationsSection() {
 
     if (error) {
         console.error(error);
-        return <p>Error loading corporation contact tokens. Contact administrators</p>;
+        return <p>{t("corporation.loading.error")}</p>;
     }
 
     const corporationTokens = data || [];
@@ -40,7 +42,7 @@ export default function CorporationsSection() {
                                 ))
                                 :
                                 <Col xs="auto" className="mt-5">
-                                    <p>No corporation contact tokens found.</p>
+                                    <p>{t("corporation.token.missing")}</p>
                                 </Col>
                         }
                     </>

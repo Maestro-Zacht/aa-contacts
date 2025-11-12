@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build && ./copy-assets.sh",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "buildApiTypes": "npx openapi-typescript ./openapi.json -o ./src/api/Schema.d.ts"
+    "buildApiTypes": "npx openapi-typescript ./openapi.json -o ./src/api/Schema.d.ts",
+    "buildTranslations": "npx i18next-cli extract && ./copy-langs.sh"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.6",

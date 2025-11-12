@@ -25,7 +25,7 @@ clean:
 
 .PHONY: buildjs
 buildjs:
-	cd frontend/; npm install; npm run build
+	cd frontend/; npm install; npm run build; npm run buildTranslations
 
 .PHONY: package
 package: buildjs

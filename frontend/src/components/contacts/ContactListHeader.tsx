@@ -9,6 +9,7 @@ import {
     updateAllianceContacts,
     updateCorporationContacts,
 } from "../../api/api";
+import { useTranslation } from "react-i18next";
 
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ interface HeaderProps {
 }
 
 function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: HeaderProps) {
+    const { t } = useTranslation();
     const mutation = useMutation({
         mutationFn: updateFn,
         onSuccess: async () => {
@@ -35,19 +37,19 @@ function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: Hea
         <>
             <header className="aa-page-header mb-4">
                 <h1 className="page-header text-center">
-                    {name} Contacts
+                    {t('contact.for', { name })}
                 </h1>
             </header>
             <Container fluid>
                 <Row className="justify-content-center my-3">
                     <Col md={4}>
                         <Card className="text-center">
-                            <Card.Header>Info</Card.Header>
+                            <Card.Header>{t("info")}</Card.Header>
                             <Card.Body>
                                 <Row>
                                     <Col>
                                         <Card.Text>
-                                            Last Updated: <Badge className="text-center ms-1" bg="success">
+                                            {t("last_updated")} <Badge className="text-center ms-1" bg="success">
                                                 <TimeAgo date={lastUpdate} />
                                             </Badge>
                                         </Card.Text>
@@ -59,7 +61,7 @@ function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: Hea
                                     onClick={handleUpdate}
                                     disabled={mutation.isPending}
                                 >
-                                    {mutation.isPending ? <Loading /> : mutation.isError ? "Error!" : "Update"}
+                                    {mutation.isPending ? <Loading /> : mutation.isError ? t("error!") : t("update")}
                                 </Button>
                             </Card.Body>
                         </Card>
@@ -71,6 +73,7 @@ function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: Hea
 }
 
 export function AllianceHeader({ allianceId }: { allianceId: number }) {
+    const { t } = useTranslation();
     const { data, isLoading, error } = useQuery({
         queryKey: ['alliance', 'tokens', allianceId],
         queryFn: () => getAllianceToken(allianceId),
@@ -78,7 +81,7 @@ export function AllianceHeader({ allianceId }: { allianceId: number }) {
 
     if (error) {
         console.error(error);
-        return <p>Error loading alliance info. Contact administrators</p>;
+        return <p>{t("alliance.info.loading.error")}</p>;
     }
 
     const queryClient = useQueryClient();
@@ -95,8 +98,8 @@ export function AllianceHeader({ allianceId }: { allianceId: number }) {
                 <Loading /> :
                 <Header
                     entityId={allianceId}
-                    name={data?.alliance.alliance_name || "Unknown Alliance"}
-                    lastUpdate={data?.last_update || "Unknown"}
+                    name={data?.alliance.alliance_name || t("alliance.unknown")}
+                    lastUpdate={data?.last_update || t("unknown")}
                     updateFn={updateAllianceContacts}
                     invalidateQueries={invalidateQueries}
                 />
@@ -106,6 +109,7 @@ export function AllianceHeader({ allianceId }: { allianceId: number }) {
 }
 
 export function CorporationHeader({ corporationId }: { corporationId: number }) {
+    const { t } = useTranslation();
     const { data, isLoading, error } = useQuery({
         queryKey: ['corporation', 'tokens', corporationId],
         queryFn: () => getCorporationToken(corporationId),
@@ -113,7 +117,7 @@ export function CorporationHeader({ corporationId }: { corporationId: number }) 
 
     if (error) {
         console.error(error);
-        return <p>Error loading corporation info. Contact administrators</p>;
+        return <p>{t("corporation.info.loading.error")}</p>;
     }
 
     const queryClient = useQueryClient();
@@ -130,8 +134,8 @@ export function CorporationHeader({ corporationId }: { corporationId: number }) 
                 <Loading /> :
                 <Header
                     entityId={corporationId}
-                    name={data?.corporation.corporation_name || "Unknown Corporation"}
-                    lastUpdate={data?.last_update || "Unknown"}
+                    name={data?.corporation.corporation_name || t("corporation.unknown")}
+                    lastUpdate={data?.last_update || t("unknown")}
                     updateFn={updateCorporationContacts}
                     invalidateQueries={invalidateQueries}
                 />

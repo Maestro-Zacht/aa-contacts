@@ -2,64 +2,64 @@
   "alliance": {
     "info": {
       "loading": {
-        "error": ""
+        "error": "Fehler beim Laden der Allianz-Informationen. Kontaktiere einen Administrator"
       }
     },
     "loading": {
-      "error": ""
+      "error": "Fehler beim Laden der Allianz-Kontakt-Token. Kontaktiere einen Administrator"
     },
     "token": {
-      "add": "",
-      "missing": ""
+      "add": "Allianz Token hinzufügen",
+      "missing": "Keine Allianz Token gefunden"
     },
-    "unknown": "",
-    "word_one": "",
-    "word_other": ""
+    "unknown": "Unbekannte Allianz",
+    "word_one": "Allianz",
+    "word_other": "Allianzen"
   },
-  "close": "",
+  "close": "Schließen",
   "contact": {
-    "for": "",
+    "for": "{{name}} Kontakte",
     "loading": {
-      "error": ""
+      "error": "Fehler beim Laden der Kontakte. Kontaktiere einen Administrator"
     },
     "save": {
-      "error": ""
+      "error": "Fehler beim Speichern der Kontakt-Notizen. Kontaktiere einen Administrator"
     },
-    "type": "",
-    "word_one": "",
-    "word_other": ""
+    "type": "Kontakt-Typ",
+    "word_one": "Kontakt",
+    "word_other": "Kontakte"
   },
   "corporation": {
     "info": {
       "loading": {
-        "error": ""
+        "error": "Fehler beim Laden der Corporation-Informationen. Kontaktiere einen Administrator"
       }
     },
     "loading": {
-      "error": ""
+      "error": "Fehler beim Laden der Corporation-Kontakt-Token. Kontaktiere einen Administrator"
     },
     "token": {
-      "add": "",
-      "missing": ""
+      "add": "Corporation Token hinzufügen",
+      "missing": "Keine Corporation Token gefunden"
     },
-    "unknown": "",
-    "word_one": "",
-    "word_other": ""
+    "unknown": "Unbekannte Corporation",
+    "word_one": "Corporation",
+    "word_other": "Corporations"
   },
-  "error": "",
-  "error!": "",
-  "info": "",
+  "error": "Fehler {{code}}",
+  "error!": "Fehler!",
+  "info": "Info",
   "label": {
-    "word_one": "",
-    "word_other": ""
+    "word_one": "Label",
+    "word_other": "Labels"
   },
-  "last_updated": "",
-  "loading": "",
-  "notes": "",
-  "notes_edit": "",
-  "save": "",
-  "search": "",
-  "standings": "",
-  "unknown": "",
-  "update": ""
+  "last_updated": "Zuletzt aktualisiert:",
+  "loading": "Lade...",
+  "notes": "Notizen",
+  "notes_edit": "Notizen bearbeiten",
+  "save": "Speichern",
+  "search": "Suche",
+  "standings": "Ansehen",
+  "unknown": "Unbekannt",
+  "update": "Aktualisieren"
 }

@@ -4,16 +4,16 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Matteo Ghia, 2024
+# Matteo Ghia, 2025
 # 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-23 15:13+0000\n"
+"POT-Creation-Date: 2025-11-12 20:50+0000\n"
 "PO-Revision-Date: 2024-10-08 06:37+0000\n"
-"Last-Translator: Matteo Ghia, 2024\n"
+"Last-Translator: Matteo Ghia, 2025\n"
 "Language-Team: Italian (Italy) (https://app.transifex.com/alliance-auth/teams/107430/it_IT/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -108,43 +108,51 @@ msgstr "Corporazioni"
 msgid "No corporations available"
 msgstr "Nessuna corporazione disponibile"
 
-#: aa_contacts/views.py:29 aa_contacts/views.py:126
+#: aa_contacts/templates/aa_contacts/switch_frontend_version.html:5
+msgid "Legacy UI"
+msgstr "Interfaccia precedente"
+
+#: aa_contacts/templates/aa_contacts/switch_frontend_version.html:7
+msgid "New UI"
+msgstr "Nuova intrefaccia"
+
+#: aa_contacts/views.py:44 aa_contacts/views.py:141
 msgid "You do not have the permissions for viewing this alliance contacts."
 msgstr "Non hai il permesso di vedere i contatti di quest'alleanza."
 
-#: aa_contacts/views.py:53 aa_contacts/views.py:141
+#: aa_contacts/views.py:68 aa_contacts/views.py:156
 msgid "You do not have the permissions for viewing this corporation contacts."
 msgstr "Non hai il permesso di vedere i contatti di questa corporazione."
 
-#: aa_contacts/views.py:79
+#: aa_contacts/views.py:94
 msgid "You need to be in an alliance to add alliance contacts."
 msgstr "Devi essere in un'alleanza per aggiungere contatti dell'alleanza."
 
-#: aa_contacts/views.py:88
+#: aa_contacts/views.py:103
 msgid "Alliance contacts for your alliance are already being tracked."
 msgstr "I contatti della tua alleanza stanno già venendo tracciati."
 
-#: aa_contacts/views.py:94
+#: aa_contacts/views.py:109
 msgid "Alliance contacts are now being tracked."
 msgstr "I contatti della tua alleanza stanno ora venendo tracciati."
 
-#: aa_contacts/views.py:110
+#: aa_contacts/views.py:125
 msgid "Corporation contacts for your corporation are already being tracked."
 msgstr "I contatti della tua corporazione stanno già venendo tracciati."
 
-#: aa_contacts/views.py:116
+#: aa_contacts/views.py:131
 msgid "Corporation contacts are now being tracked."
 msgstr "I contatti della tua corporazione stanno ora venendo tracciati."
 
-#: aa_contacts/views.py:131
+#: aa_contacts/views.py:146
 msgid "Alliance contacts are being updated."
 msgstr "I contatti dell'alleanza stanno venendo aggiornati."
 
-#: aa_contacts/views.py:146
+#: aa_contacts/views.py:161
 msgid "Corporation contacts are being updated."
 msgstr "I contatti della corporazione stanno venendo aggiornati."
 
-#: aa_contacts/views.py:159 aa_contacts/views.py:181
+#: aa_contacts/views.py:174 aa_contacts/views.py:196
 #, python-format
 msgid "%(contact)s contact updated successfully"
 msgstr "Contatto di %(contact)s aggiornato con successo"

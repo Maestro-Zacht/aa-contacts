@@ -1,0 +1,65 @@
+{
+  "alliance": {
+    "info": {
+      "loading": {
+        "error": "Errore nel caricare le informazioni dell'alleanza. Contatta gli amministratori"
+      }
+    },
+    "loading": {
+      "error": "Errore nel caricare i token per i contatti dell'alleanza. Contatta gli amministratori"
+    },
+    "token": {
+      "add": "Aggiungi Token per Alleanza",
+      "missing": "Nessun token per i contatti dell'alleanza è stato trovato"
+    },
+    "unknown": "Alleanza Sconosciuta",
+    "word_one": "Alleanza",
+    "word_other": "Alleanze"
+  },
+  "close": "Chiudi",
+  "contact": {
+    "for": "Contatti di {{name}}",
+    "loading": {
+      "error": "Errore caricamento dei contatti. Contatta gli amministratori"
+    },
+    "save": {
+      "error": "Errore nel salvare le note del contatto. Contatta gli amministratori"
+    },
+    "type": "Tipo di Contatto",
+    "word_one": "Contatto",
+    "word_other": "Contatti"
+  },
+  "corporation": {
+    "info": {
+      "loading": {
+        "error": "Errore nel caricare le informazioni della corporazione. Contatta gli amministratori"
+      }
+    },
+    "loading": {
+      "error": "Errore nel caricare i token per i contatti della corporazione. Contatta gli amministratori"
+    },
+    "token": {
+      "add": "Aggiungi Token per Corporazione",
+      "missing": "Nessun token per i contatti della corporazione è stato trovato"
+    },
+    "unknown": "Corporazione Sconosciuta",
+    "word_one": "Corporazione",
+    "word_other": "Corporazioni"
+  },
+  "error": "Errore {{code}}",
+  "error!": "Errore!",
+  "info": "Informazioni",
+  "label": {
+    "word_one": "Etichetta",
+    "word_other": "Etichette"
+  },
+  "last_updated": "Ultimo aggiornamento:",
+  "loading": "Caricamento...",
+  "notes": "Note",
+  "notes_edit": "Modifica Note",
+  "save": "Salva",
+  "search": "Cerca",
+  "standings": "Reputazioni",
+  "unknown": "Sconosciuto",
+  "update": "Aggiorna"
+}

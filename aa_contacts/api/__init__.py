@@ -12,7 +12,6 @@ api = NinjaAPI(
     version="0.0.1",
     urls_namespace='aa_contacts:api',
     auth=django_auth,
-    csrf=True,
     openapi_url=settings.DEBUG and "/openapi.json" or ""
 )
 

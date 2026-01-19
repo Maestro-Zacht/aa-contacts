@@ -12,7 +12,7 @@
     "buildTranslations": "npx i18next-cli extract && ./copy-langs.sh"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.90.18",
+    "@tanstack/react-query": "^5.90.19",
     "@types/js-cookie": "^3.0.6",
     "bootstrap": "^5.3.8",
     "datatables.net-bs5": "^2.3.6",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@tanstack/eslint-plugin-query": "^5.91.2",
+    "@tanstack/eslint-plugin-query": "^5.91.3",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
@@ -43,7 +43,7 @@
     "i18next-cli": "^1.36.1",
     "openapi-typescript": "^7.10.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.53.0",
+    "typescript-eslint": "^8.53.1",
     "vite": "^7.3.1"
   }
 }

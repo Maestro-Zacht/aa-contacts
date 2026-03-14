@@ -6,8 +6,9 @@ from django.utils.translation import gettext as _, gettext_lazy as gl
 from allianceauth.eveonline.models import EveCharacter, EveAllianceInfo, EveCorporationInfo
 
 from charlink.app_imports.utils import AppImport, LoginImport
+from charlink.utils import users_with_permissions
+
 from esi.models import Token
-from app_utils.allianceauth import users_with_permission
 
 from .models import AllianceToken, CorporationToken
 from .tasks import update_alliance_contacts, update_corporation_contacts
@@ -54,21 +55,11 @@ def _corporation_login(request, token: Token):
 
 
 def _alliance_users_with_perms():
-    return users_with_permission(
-        Permission.objects.get(
-            content_type__app_label='aa_contacts',
-            codename='manage_alliance_contacts'
-        )
-    )
+    return users_with_permissions('aa_contacts.manage_alliance_contacts', require_all=False)
 
 
 def _corporation_users_with_perms():
-    return users_with_permission(
-        Permission.objects.get(
-            content_type__app_label='aa_contacts',
-            codename='manage_corporation_contacts'
-        )
-    )
+    return users_with_permissions('aa_contacts.manage_corporation_contacts', require_all=False)
 
 
 app_import = AppImport(

@@ -1,3 +1,3 @@
-from app_utils.app_settings import clean_setting
+from django.conf import settings
 
-TASK_JITTER = clean_setting('AA_CONTACTS_TASK_JITTER', 300)
+TASK_JITTER = getattr(settings, 'AA_CONTACTS_TASK_JITTER', 300)

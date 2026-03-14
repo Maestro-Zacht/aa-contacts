@@ -1,3 +1,6 @@
+ESI_DATE := $(shell awk -F"'" '/__esi_compatibility_date__/ {print $$2}' aa_contacts/__init__.py)
+myauth_path := '/home/allianceauth/myauth'
+
 tox_tests:
 	python -m tox -v -e py311; \
 	rm -rf .tox/
@@ -32,3 +35,8 @@ package: buildjs
 	python -m pip install -U pip
 	pip install -U build
 	python -m build
+
+.PHONY: generate-esi-stubs
+generate-esi-stubs:
+	@echo "Generating ESI stubs for compatibility date: $(ESI_DATE)"
+	python $(myauth_path)/manage.py generate_esi_stubs --compatibility_date="$(ESI_DATE)"

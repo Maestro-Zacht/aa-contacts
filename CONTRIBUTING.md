@@ -34,6 +34,10 @@ If you wish to use a more traditional setup, you can use the [AA guide](https://
 
 This project uses a React frontend. At the first time setting up the project, run `make package` to install the dependencies, build and copy the frontend into Django static files. If you wish to contribute to the frontend, you can use `make dev` to start the development server. The changes will be packaged into the Django static files when the package is built in GitHub Actions.
 
+## Generating ESI stubs
+
+The ESI stubs are generated using `make generate-esi-stubs`. It'll use the esi compatibility date specified in the `aa_contacts/__init__.py` file to generate the stubs.
+
 ## Running tests
 
 To run the tests locally, you can use `make tox_tests` to run the tests in a tox environment.

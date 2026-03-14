@@ -47,7 +47,7 @@ def update_contacts(request, alliance_id: int = Path(...)):
     if not token.exists():
         return 404, None
 
-    update_alliance_contacts(alliance_id)
+    update_alliance_contacts.delay(alliance_id)
 
     return 200, None
 

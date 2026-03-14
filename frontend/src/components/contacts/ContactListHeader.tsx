@@ -10,6 +10,7 @@ import {
     updateCorporationContacts,
 } from "../../api/api";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 
 interface HeaderProps {
@@ -21,12 +22,24 @@ interface HeaderProps {
 }
 
 function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: HeaderProps) {
+    const [updateSuccess, setUpdateSuccess] = useState<null | boolean>(null);
     const { t } = useTranslation();
     const mutation = useMutation({
         mutationFn: updateFn,
-        onSuccess: async () => {
-            await invalidateQueries();
-        }
+        onSuccess: () => {
+            setUpdateSuccess(true);
+            setTimeout(() => {
+                setUpdateSuccess(null)
+                invalidateQueries();
+            }, 3000);
+        },
+        onError: () => {
+            setUpdateSuccess(false);
+            setTimeout(() => {
+                setUpdateSuccess(null)
+                invalidateQueries();
+            }, 3000);
+        },
     });
 
     const handleUpdate = () => {
@@ -56,12 +69,15 @@ function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: Hea
                                     </Col>
                                 </Row>
                                 <Button
-                                    variant={mutation.isError ? "danger" : "primary"}
+                                    variant={mutation.isError || updateSuccess === false ? "danger" : updateSuccess === true ? "success" : "primary"}
                                     className="mt-4"
                                     onClick={handleUpdate}
-                                    disabled={mutation.isPending}
+                                    disabled={mutation.isPending || updateSuccess !== null}
                                 >
-                                    {mutation.isPending ? <Loading /> : mutation.isError ? t("error!") : t("update")}
+                                    {mutation.isPending ? <Loading />
+                                        : updateSuccess === false ? <i className="fa-solid fa-x"></i>
+                                            : updateSuccess === true ? <i className="fa-solid fa-check"></i>
+                                                : t("update")}
                                 </Button>
                             </Card.Body>
                         </Card>

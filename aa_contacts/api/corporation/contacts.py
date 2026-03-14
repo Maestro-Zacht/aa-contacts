@@ -48,7 +48,7 @@ def update_contacts(request, corporation_id: int = Path(...)):
     if not token.exists():
         return 404, None
 
-    update_corporation_contacts(corporation_id)
+    update_corporation_contacts.delay(corporation_id)
 
     return 200, None
 

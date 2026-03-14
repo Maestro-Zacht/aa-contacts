@@ -2,68 +2,67 @@
   "alliance": {
     "info": {
       "loading": {
-        "error": ""
+        "error": "Errore nel caricare le informazioni dell'alleanza. Contatta gli amministratori"
       }
     },
     "loading": {
-      "error": ""
+      "error": "Errore nel caricare i token per i contatti dell'alleanza. Contatta gli amministratori"
     },
     "token": {
-      "add": "",
-      "missing": ""
+      "add": "Aggiungi Token per Alleanza",
+      "missing": "Nessun token per i contatti dell'alleanza è stato trovato"
     },
-    "unknown": "",
+    "unknown": "Alleanza Sconosciuta",
     "word_one": "Alleanza",
     "word_many": "Alleanze",
     "word_other": "Alleanze"
   },
-  "close": "",
+  "close": "Chiudi",
   "contact": {
-    "for": "",
+    "for": "Contatti di {{name}}",
     "loading": {
-      "error": ""
+      "error": "Errore caricamento dei contatti. Contatta gli amministratori"
     },
     "save": {
-      "error": ""
+      "error": "Errore nel salvare le note del contatto. Contatta gli amministratori"
     },
-    "type": "",
-    "word_one": "",
-    "word_many": "",
-    "word_other": ""
+    "type": "Tipo di Contatto",
+    "word_one": "Contatto",
+    "word_many": "Contatti",
+    "word_other": "Contatti"
   },
   "corporation": {
     "info": {
       "loading": {
-        "error": ""
+        "error": "Errore nel caricare le informazioni della corporazione. Contatta gli amministratori"
       }
     },
     "loading": {
-      "error": ""
+      "error": "Errore nel caricare i token per i contatti della corporazione. Contatta gli amministratori"
     },
     "token": {
-      "add": "",
-      "missing": ""
+      "add": "Aggiungi Token per Corporazione",
+      "missing": "Nessun token per i contatti della corporazione è stato trovato"
     },
-    "unknown": "",
+    "unknown": "Corporazione Sconosciuta",
     "word_one": "Corporazione",
     "word_many": "Corporazioni",
     "word_other": "Corporazioni"
   },
-  "error": "",
-  "error!": "",
-  "info": "",
+  "error": "Errore {{code}}",
+  "info": "Informazioni",
   "label": {
-    "word_one": "",
-    "word_many": "",
-    "word_other": ""
+    "word_one": "Etichetta",
+    "word_many": "Etichette",
+    "word_other": "Etichette"
   },
-  "last_updated": "",
-  "loading": "",
-  "notes": "",
-  "notes_edit": "",
-  "save": "",
-  "search": "",
-  "standings": "",
-  "unknown": "",
-  "update": ""
+  "last_updated": "Ultimo aggiornamento:",
+  "loading": "Caricamento...",
+  "notes": "Note",
+  "notes_edit": "Modifica Note",
+  "save": "Salva",
+  "search": "Cerca",
+  "standings": "Reputazioni",
+  "unknown": "Sconosciuto",
+  "update": "Aggiorna"
 }

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from allianceauth.eveonline.models import EveCorporationInfo, EveAllianceInfo
 
-from aa_contacts.models import Contact, AllianceContact, CorporationContact
+from aa_contacts.models import Contact
 
 from allianceauth.services.hooks import get_extension_logger
 

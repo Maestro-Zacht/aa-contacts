@@ -20,6 +20,5 @@ RUN pip install -r requirements.txt
 
 COPY . /workspace
 RUN pip install -e /workspace
-RUN cd /workspace/frontend; npm install; cd ${AUTH_HOME}
 
 RUN allianceauth update myauth

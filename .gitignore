@@ -157,3 +157,4 @@ cython_debug/
 
 mysql-data/
 aa_contacts/static/aa_contacts/react
+frontend/analyse.html

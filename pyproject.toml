@@ -55,19 +55,18 @@ module.name = "aa_contacts"
 [tool.ruff]
 extend-exclude = [
     ".devcontainer/*.py",
+    "aa_contacts/migrations",
     "runtests.py",
     "testauth",
 ]
 lint.extend-select = [
     "A",
     "AIR",
-    "ANN",
     "ARG",
     "ASYNC",
     "B",
     "BLE",
     "C4",
-    "C90",
     "COM",
     "D",
     "DJ",
@@ -96,7 +95,6 @@ lint.extend-select = [
     "PGH",
     "PIE",
     "PL",
-    "PT",
     "PTH",
     "PYI",
     "Q",
@@ -118,8 +116,12 @@ lint.extend-select = [
     "YTT",
 ]
 lint.ignore = [
+    "COM812",
     "D1",
+    "D203",
+    "D213",
     "E501",
+    "S311",
 ]
 lint.per-file-ignores."*_test.py" = [
     "ANN",
@@ -172,3 +174,4 @@ lint.per-file-ignores."test_*.py" = [
     "S107",
     "SLF001"
 ]
+lint.flake8-boolean-trap.extend-allowed-calls = [ "django.db.models.Value", "pydantic.Field" ]

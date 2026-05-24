@@ -1,7 +1,6 @@
+from app_utils.testdata_factories import UserMainFactory
 from django.test import TestCase
 from django.urls import reverse
-
-from app_utils.testdata_factories import UserMainFactory
 
 
 class TestHooks(TestCase):

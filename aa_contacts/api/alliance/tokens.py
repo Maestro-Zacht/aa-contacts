@@ -1,12 +1,13 @@
-from ninja import Router
-
-from django.contrib.auth.models import User
+from typing import TYPE_CHECKING
 
 from allianceauth.authentication.models import CharacterOwnership
+from ninja import Router
+
+from aa_contacts.api.schema import AllianceTokenSchema
 from aa_contacts.models import AllianceToken
 
-from ..schema import AllianceTokenSchema
-
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
 
 router = Router()
 
@@ -16,12 +17,17 @@ def get_list(request):
     return AllianceToken.visible_for(request.user)
 
 
-@router.get("/{int:alliance_id}/", response={200: AllianceTokenSchema, 403: None, 404: None})
+@router.get(
+    "/{int:alliance_id}/", response={200: AllianceTokenSchema, 403: None, 404: None}
+)
 def get_single(request, alliance_id: int):
     user: User = request.user
 
     ownerships = CharacterOwnership.objects.filter(user=user)
-    if not user.is_superuser and not ownerships.filter(character__alliance_id=alliance_id).exists():
+    if (
+        not user.is_superuser
+        and not ownerships.filter(character__alliance_id=alliance_id).exists()
+    ):
         return 403, None
 
     try:

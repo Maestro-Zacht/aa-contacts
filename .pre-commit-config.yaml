@@ -120,8 +120,8 @@ repos:
         args:
           - --verbose
 
-  # - repo: https://github.com/astral-sh/ruff-pre-commit
-  #   rev: v0.15.14
-  #   hooks:
-  #     - id: ruff-check
-  #     - id: ruff-format
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.14
+    hooks:
+      - id: ruff-check
+      - id: ruff-format

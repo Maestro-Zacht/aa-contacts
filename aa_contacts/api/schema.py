@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import Optional
-from ninja import Schema, ModelSchema
+from typing import TYPE_CHECKING, ClassVar
 
-from django.contrib.auth.models import User
-
-from allianceauth.eveonline.models import EveCorporationInfo, EveAllianceInfo
+from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
+from allianceauth.services.hooks import get_extension_logger
+from ninja import ModelSchema, Schema
 
 from aa_contacts.models import Contact
 
-from allianceauth.services.hooks import get_extension_logger
+if TYPE_CHECKING:
+    from django.contrib.auth.models import User
 
 logger = get_extension_logger(__name__)
 
@@ -23,7 +23,7 @@ class EveAllianceSchema(ModelSchema):
 
     class Meta:
         model = EveAllianceInfo
-        fields = ["alliance_id", "alliance_name"]
+        fields: ClassVar[list[str]] = ["alliance_id", "alliance_name"]
 
     @staticmethod
     def resolve_logo_url(obj: EveAllianceInfo) -> str:
@@ -31,12 +31,12 @@ class EveAllianceSchema(ModelSchema):
 
 
 class EveCorporationSchema(ModelSchema):
-    alliance: Optional[EveAllianceSchema] = None
+    alliance: EveAllianceSchema | None = None
     logo_url: str
 
     class Meta:
         model = EveCorporationInfo
-        fields = ["corporation_id", "corporation_name"]
+        fields: ClassVar[list[str]] = ["corporation_id", "corporation_name"]
 
     @staticmethod
     def resolve_logo_url(obj: EveCorporationInfo) -> str:
@@ -66,15 +66,16 @@ class ContactSchema(Schema):
     contact_logo_url: str
     contact_name: str
     standing: float
-    notes: Optional[str] = None
+    notes: str | None = None
     can_edit_notes: bool
-    labels: list[ContactLabelSchema] = []
+    labels: ClassVar[list[ContactLabelSchema]] = []
 
     @staticmethod
-    def resolve_notes(obj: Contact, context) -> Optional[str]:
+    def resolve_notes(obj: Contact, context) -> str | None:
         user: User = context["request"].user
         if obj.can_view_notes(user):
             return obj.notes
+        return None
 
     @staticmethod
     def resolve_contact_logo_url(obj: Contact) -> str:

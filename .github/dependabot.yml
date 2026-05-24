@@ -15,6 +15,37 @@ updates:
       minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+      react-ecosystem-major:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+          - "@vitejs/plugin-react"
+        update-types: ["major"]
+
+      eslint-ecosystem-major:
+        patterns:
+          - "eslint"
+          - "eslint-plugin-*"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "globals"
+        update-types: ["major"]
+
+      i18next-ecosystem-major:
+        patterns:
+          - "*i18next*"
+        update-types: ["major"]
+
+      datatables-ecosystem-major:
+        patterns:
+          - "datatables.net*"
+        update-types: ["major"]
+
+      tanstack-ecosystem-major:
+        patterns:
+          - "@tanstack/*"
+        update-types: ["major"]
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: 'github-actions'

@@ -89,7 +89,7 @@ INSTALLED_APPS += [
 
     'ninja',
     "debug_toolbar",
-    'taskmonitor',
+    # 'taskmonitor',
 
     'charlink',
     'securegroups',

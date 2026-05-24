@@ -2,7 +2,7 @@ ESI_DATE := $(shell awk -F"'" '/__esi_compatibility_date__/ {print $$2}' aa_cont
 myauth_path := '/home/allianceauth/myauth'
 
 tox_tests:
-	python -m tox -v -e py311; \
+	python -m tox -v -e py312; \
 	rm -rf .tox/
 
 # Translation files

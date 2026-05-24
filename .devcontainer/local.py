@@ -13,9 +13,7 @@ DATABASES["default"] = {
     "PASSWORD": os.environ.get("AA_DB_PASSWORD"),
     "HOST": os.environ.get("AA_DB_HOST"),
     "PORT": os.environ.get("AA_DB_PORT", "3306"),
-    "OPTIONS": {
-        "charset": os.environ.get("AA_DB_CHARSET", "utf8mb4")
-    }
+    "OPTIONS": {"charset": os.environ.get("AA_DB_CHARSET", "utf8mb4")},
 }
 
 # Register an application at https://developers.eveonline.com for Authentication
@@ -71,7 +69,6 @@ INSTALLED_APPS += [
     # 'allianceauth.permissions_tool',
     # 'allianceauth.srp',
     # 'allianceauth.timerboard',
-
     # https://allianceauth.readthedocs.io/en/latest/features/services/index.html
     # 'allianceauth.services.modules.discord',
     # 'allianceauth.services.modules.discourse',
@@ -84,15 +81,12 @@ INSTALLED_APPS += [
     # 'allianceauth.services.modules.smf',
     # 'allianceauth.services.modules.teamspeak3',
     # 'allianceauth.services.modules.xenforo',
-
-    'aa_contacts',
-
-    'ninja',
+    "aa_contacts",
+    "ninja",
     "debug_toolbar",
     # 'taskmonitor',
-
-    'charlink',
-    'securegroups',
+    "charlink",
+    "securegroups",
 ]
 
 #######################################
@@ -105,10 +99,10 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 }
 
-CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
-    'task': 'aa_contacts.tasks.update_all_contacts',
-    'schedule': crontab(minute='0'),
-    'apply_offset': True,
+CELERYBEAT_SCHEDULE["aa_contacts_update_all_contacts"] = {
+    "task": "aa_contacts.tasks.update_all_contacts",
+    "schedule": crontab(minute="0"),
+    "apply_offset": True,
 }
 
 # AA_CONTACTS_TASK_JITTER = 60

@@ -20,13 +20,13 @@
 				"batisteo.vscode-django",
 				"github.vscode-github-actions",
 				"ms-python.vscode-pylance",
-				"ms-python.autopep8",
 				"ms-azuretools.vscode-docker",
 				"GitHub.copilot",
 				"yzhang.markdown-all-in-one",
 				"DavidAnson.vscode-markdownlint",
 				"donjayamanne.githistory",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"charliermarsh.ruff"
 			]
 		}
 	}

@@ -54,3 +54,90 @@ Changelog = "https://github.com/Maestro-Zacht/aa-contacts/releases"
 [tool.flit.module]
 name = "aa_contacts"
 
+[tool.ruff]
+extend-exclude = [
+	".devcontainer/local.py",
+	"testauth",
+	"runtests.py",
+]
+lint.extend-select = [
+	"AIR",
+	"FAST",
+	"YTT",
+	"ANN",
+	"ASYNC",
+	"S",
+	"BLE",
+	"FBT",
+	"B",
+	"A",
+	"COM",
+	"C4",
+	"DTZ",
+	"T10",
+	"DJ",
+	"EM",
+	"EXE",
+	"FIX",
+	"FA",
+	"INT",
+	"ISC",
+	"ICN",
+	"LOG",
+	"G",
+	"INP",
+	"PIE",
+	"T20",
+	"PYI",
+	"PT",
+	"Q",
+	"RSE",
+	"RET",
+	"SLF",
+	"SIM",
+	"SLOT",
+	"TID",
+	"TD",
+	"TC",
+	"ARG",
+	"PTH",
+	"FLY",
+	"I",
+	"C90",
+	"NPY",
+	"PD",
+	"N",
+	"PERF",
+	"E",
+	"W",
+	"D",
+	"F",
+	"PGH",
+	"PL",
+	"UP",
+	"FURB",
+	"RUF",
+	"TRY",
+]
+lint.ignore = [
+	"E501",
+	"D1",
+	"EXE002",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# IGNORE RULES FOR TESTS
+# S101    # Flake8-bandit - asserts are standard in pytest
+# S105    # Flake8-bandit - possible hardcoded password
+# S106    # Flake8-bandit - possible hardcoded password in function argument
+# S107    # Flake8-bandit - hardcoded passwords in function defaults (test helpers need defaults)
+# PLR2004 # Pylint - magic values (e.g. 404, 200) are common in tests
+# SLF001  # Flake8-self - private member access needed to test internal state
+# D       # Pydocstyle - docstrings are often redundant in verbose test names
+# ANN     # Flake8-annotations - type annotations are unnecessary overhead for tests
+# ARG001  # Flake8-unused-arguments - pytest fixtures ensure state exists even when not directly used
+# PLC0415 # Pylint - local imports in tests are valid for test isolation and self-contained tests
+# EM102   # Flake8-errmsg - f-string exceptions in test helpers are acceptable for debugging
+"test_*.py" = ["S101", "S105", "S106", "S107", "PLR2004", "SLF001", "D", "ANN", "ARG001", "PLC0415", "EM102"]
+"*_test.py" = ["S101", "S105", "S106", "S107", "PLR2004", "SLF001", "D", "ANN", "ARG001", "PLC0415", "EM102"]
+"conftest.py" = ["S101", "S105", "S106", "S107", "PLR2004", "SLF001", "D", "ANN", "ARG001", "PLC0415", "EM102"]

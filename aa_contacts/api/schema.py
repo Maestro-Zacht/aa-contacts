@@ -27,7 +27,7 @@ class EveAllianceSchema(ModelSchema):
 
     @staticmethod
     def resolve_logo_url(obj: EveAllianceInfo) -> str:
-        return obj.logo_url_32.split('?')[0]
+        return obj.logo_url_32.split("?")[0]
 
 
 class EveCorporationSchema(ModelSchema):
@@ -40,7 +40,7 @@ class EveCorporationSchema(ModelSchema):
 
     @staticmethod
     def resolve_logo_url(obj: EveCorporationInfo) -> str:
-        return obj.logo_url_32.split('?')[0]
+        return obj.logo_url_32.split("?")[0]
 
 
 class TokenSchema(Schema):
@@ -72,17 +72,17 @@ class ContactSchema(Schema):
 
     @staticmethod
     def resolve_notes(obj: Contact, context) -> Optional[str]:
-        user: User = context['request'].user
+        user: User = context["request"].user
         if obj.can_view_notes(user):
             return obj.notes
 
     @staticmethod
     def resolve_contact_logo_url(obj: Contact) -> str:
-        return obj.image_src.split('?')[0]
+        return obj.image_src.split("?")[0]
 
     @staticmethod
     def resolve_can_edit_notes(obj: Contact, context) -> bool:
-        user: User = context['request'].user
+        user: User = context["request"].user
         return obj.can_edit_notes(user)
 
 

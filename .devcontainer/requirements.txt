@@ -1,12 +1,13 @@
-ipython
-bpython
-tox
-coverage
-allianceauth-app-utils
-factory_boy
-django-debug-toolbar
-# aa-taskmonitor
-ruff
 
 aa-charlink
+allianceauth-app-utils
 allianceauth-securegroups
+bpython
+coverage
+django-debug-toolbar
+factory_boy
+ipython
+pre-commit
+# aa-taskmonitor
+ruff
+tox

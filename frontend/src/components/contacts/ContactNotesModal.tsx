@@ -74,4 +74,3 @@ export default function ContactNotesModal({ initialNotes, mutation, contactPk }:
         </>
     )
 }
-

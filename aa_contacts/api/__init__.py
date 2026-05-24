@@ -10,9 +10,9 @@ from .permissions import router as permissions_router
 api = NinjaAPI(
     title="AA Contacts API",
     version="0.0.1",
-    urls_namespace='aa_contacts:api',
+    urls_namespace="aa_contacts:api",
     auth=django_auth,
-    openapi_url=settings.DEBUG and "/openapi.json" or ""
+    openapi_url=settings.DEBUG and "/openapi.json" or "",
 )
 
 api.add_router("/alliances", alliance_router)

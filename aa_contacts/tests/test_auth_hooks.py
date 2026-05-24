@@ -19,5 +19,5 @@ class TestHooks(TestCase):
 
     def test_menu_hook(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse("aa_contacts:dashboard"))
+        response = self.client.get(reverse("aa_contacts:react_view"))
         self.assertContains(response, self.html_menu, html=True)

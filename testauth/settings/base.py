@@ -6,10 +6,13 @@ It gets overwritten by the 'allianceauth update' command.
 If you wish to make changes, overload the setting in your project's settings file (local.py).
 """
 
+# Standard Library
 import os
 
+# Third Party
 from celery.schedules import crontab
 
+# Django
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
@@ -57,10 +60,10 @@ CELERYBEAT_SCHEDULE = {
         "task": "esi.tasks.cleanup_callbackredirect",
         "schedule": crontab(minute="0", hour="*/4"),
     },
-    'esi_cleanup_token': {  # 1/48th * 1hr = 48Hr/2Day Refresh Cycles.
-        'task': 'esi.tasks.cleanup_token_subset',
-        'schedule': crontab(minute="0", hour="*"),
-        'apply_offset': True
+    "esi_cleanup_token": {  # 1/48th * 1hr = 48Hr/2Day Refresh Cycles.
+        "task": "esi.tasks.cleanup_token_subset",
+        "schedule": crontab(minute="0", hour="*"),
+        "apply_offset": True,
     },
     "run_model_update": {
         "task": "allianceauth.eveonline.tasks.run_model_update",
@@ -217,6 +220,15 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "allianceauth.framework.staticfiles.storage.AaManifestStaticFilesStorage",
+    },
+}
+
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, "static"),

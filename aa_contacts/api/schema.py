@@ -68,7 +68,7 @@ class ContactSchema(Schema):
     standing: float
     notes: str | None = None
     can_edit_notes: bool
-    labels: ClassVar[list[ContactLabelSchema]] = []
+    labels: list[ContactLabelSchema] = []  # noqa: RUF012
 
     @staticmethod
     def resolve_notes(obj: Contact, context) -> str | None:

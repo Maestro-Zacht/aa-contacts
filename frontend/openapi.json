@@ -447,6 +447,9 @@
                         }
                     }
                 },
+                "tags": [
+                    "permissions"
+                ],
                 "security": [
                     {
                         "SessionAuth": []

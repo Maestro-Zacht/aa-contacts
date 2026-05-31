@@ -1,4 +1,5 @@
 from random import randint
+from typing import TYPE_CHECKING
 
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
@@ -19,6 +20,18 @@ from .models import (
     CorporationToken,
 )
 from .providers import esi
+
+if TYPE_CHECKING:
+    from celery.result import AsyncResult
+
+    # https://github.com/sbdchd/celery-types
+    classes = [
+        AsyncResult,
+    ]
+
+    for cls in classes:
+        setattr(cls, "__class_getitem__", classmethod(lambda cls, *args, **kwargs: cls))  # noqa: ARG005, B010
+
 
 logger = get_extension_logger(__name__)
 

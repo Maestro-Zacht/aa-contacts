@@ -202,11 +202,8 @@ class Contact(models.Model):
                     faction_id=self.contact_id
                 ).faction_name
             except EveFactionInfo.DoesNotExist:
-                faction = EveFactionInfo.provider.get_faction(self.contact_id)
-                EveFactionInfo.objects.create(
-                    faction_id=faction.id, faction_name=faction.name
-                )
-                res = faction.name
+                faction = EveFactionInfo.objects.create_faction(self.contact_id)
+                res = faction.faction_name
         else:
             msg = f"Unknown contact type: {self.contact_type}"
             raise ValueError(msg)

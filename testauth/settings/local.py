@@ -3,29 +3,21 @@
 
 from .base import *
 
-if os.environ.get('USE_MYSQL', True) is True:
-    DATABASES = {
-        "default": {
-            "ENGINE": 'django.db.backends.mysql',
-            'NAME': os.environ.get('AA_DB_NAME'),
-            'USER': os.environ.get('AA_DB_USER'),
-            'PASSWORD': os.environ.get('AA_DB_PASSWORD'),
-            'HOST': os.environ.get('AA_DB_HOST'),
-            'PORT': '3306',
-            "OPTIONS": {"charset": "utf8mb4"},
-            "TEST": {
-                "CHARSET": "utf8mb4",
-                "NAME": f"test_{os.environ.get('AA_DB_NAME')}",
-            },
+DATABASES = {
+    "default": {
+        "ENGINE": 'django.db.backends.mysql',
+        'NAME': os.environ.get('AA_DB_NAME'),
+        'USER': os.environ.get('AA_DB_USER'),
+        'PASSWORD': os.environ.get('AA_DB_PASSWORD'),
+        'HOST': os.environ.get('AA_DB_HOST'),
+        'PORT': '3306',
+        "OPTIONS": {"charset": "utf8mb4"},
+        "TEST": {
+            "CHARSET": "utf8mb4",
+            "NAME": f"test_{os.environ.get('AA_DB_NAME')}",
         },
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": str(os.path.join(BASE_DIR, "alliance_auth.sqlite3")),
-        },
-    }
+    },
+}
 
 CACHES = {
     "default": {

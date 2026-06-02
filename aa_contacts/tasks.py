@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from random import randint
 from typing import TYPE_CHECKING
 
@@ -9,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from esi.exceptions import HTTPNotModified
 from esi.models import Token
+from httpx import Response
 
 from .app_settings import TASK_JITTER
 from .models import (
@@ -23,6 +26,12 @@ from .providers import esi
 
 if TYPE_CHECKING:
     from celery.result import AsyncResult
+    from esi.stubs import (
+        AlliancesAllianceIdContactsGet,
+        AlliancesAllianceIdContactsLabelsGet,
+        CorporationsCorporationIdContactsGet,
+        CorporationsCorporationIdContactsLabelsGet,
+    )
 
     # https://github.com/sbdchd/celery-types
     classes = [
@@ -60,15 +69,25 @@ class BaseContactUpdater:
         raise NotImplementedError
 
     @classmethod
-    def get_labels_data(cls, entity_id: int, token: Token):
+    def get_labels_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple[
+        "AlliancesAllianceIdContactsLabelsGet | CorporationsCorporationIdContactsLabelsGet",
+        Response,
+    ]:
         raise NotImplementedError
 
     @classmethod
-    def get_contacts_data(cls, entity_id: int, token: Token):
+    def get_contacts_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple[
+        "AlliancesAllianceIdContactsGet | CorporationsCorporationIdContactsGet",
+        Response,
+    ]:
         raise NotImplementedError
 
     @classmethod
-    def get_contacts_model(cls):
+    def get_contacts_model(cls) -> type[AllianceContact] | type[CorporationContact]:
         raise NotImplementedError
 
     @classmethod
@@ -78,7 +97,9 @@ class BaseContactUpdater:
         raise NotImplementedError
 
     @classmethod
-    def get_labels_model(cls):
+    def get_labels_model(
+        cls,
+    ) -> type[AllianceContactLabel] | type[CorporationContactLabel]:
         raise NotImplementedError
 
     @classmethod
@@ -97,7 +118,9 @@ class BaseContactUpdater:
         entity_token = cls.get_entity_token(entity)
 
         try:
-            labels_data = cls.get_labels_data(entity_id, entity_token.token)
+            labels_data, labels_response = cls.get_labels_data(
+                entity_id, entity_token.token, entity_token.last_modified_labels
+            )
         except HTTPNotModified:
             update_labels = False
         else:
@@ -105,7 +128,9 @@ class BaseContactUpdater:
             update_labels = True
 
         try:
-            contacts_data = cls.get_contacts_data(entity_id, entity_token.token)
+            contacts_data, contacts_response = cls.get_contacts_data(
+                entity_id, entity_token.token, entity_token.last_modified_contacts
+            )
         except HTTPNotModified:
             update_contacts = False
         else:
@@ -123,6 +148,11 @@ class BaseContactUpdater:
             label_objects = {}
 
             if update_labels:
+                entity_token.last_modified_labels = datetime.strptime(
+                    labels_response.headers.get("Last-Modified"),
+                    "%a, %d %b %Y %H:%M:%S GMT",
+                ).replace(tzinfo=dt_timezone.utc)
+
                 cls.get_labels_model().objects.filter(
                     **cls.get_entity_selector(entity),
                 ).exclude(
@@ -144,6 +174,11 @@ class BaseContactUpdater:
                 label_objects = {label.label_id: label for label in existing_labels}
 
             if update_contacts:
+                entity_token.last_modified_contacts = datetime.strptime(
+                    contacts_response.headers.get("Last-Modified"),
+                    "%a, %d %b %Y %H:%M:%S GMT",
+                ).replace(tzinfo=dt_timezone.utc)
+
                 missing_contacts = (
                     cls.get_contacts_model()
                     .objects.filter(
@@ -216,18 +251,22 @@ class CorporationContactUpdater(BaseContactUpdater):
             raise ValueError(msg) from e
 
     @classmethod
-    def get_labels_data(cls, entity_id: int, token: Token):
+    def get_labels_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple["CorporationsCorporationIdContactsLabelsGet", "Response"]:
         return esi.client.Contacts.GetCorporationsCorporationIdContactsLabels(
             corporation_id=entity_id,
             token=token,
-        ).results()
+        ).results(last_modified=last_modified, return_response=True)
 
     @classmethod
-    def get_contacts_data(cls, entity_id: int, token: Token):
+    def get_contacts_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple["CorporationsCorporationIdContactsGet", "Response"]:
         return esi.client.Contacts.GetCorporationsCorporationIdContacts(
             corporation_id=entity_id,
             token=token,
-        ).results()
+        ).results(last_modified=last_modified, return_response=True)
 
     @classmethod
     def get_contacts_model(cls):
@@ -275,18 +314,22 @@ class AllianceContactUpdater(BaseContactUpdater):
             raise ValueError(msg) from e
 
     @classmethod
-    def get_labels_data(cls, entity_id: int, token: Token):
+    def get_labels_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple["AlliancesAllianceIdContactsLabelsGet", "Response"]:
         return esi.client.Contacts.GetAlliancesAllianceIdContactsLabels(
             alliance_id=entity_id,
             token=token,
-        ).results()
+        ).results(last_modified=last_modified, return_response=True)
 
     @classmethod
-    def get_contacts_data(cls, entity_id: int, token: Token):
+    def get_contacts_data(
+        cls, entity_id: int, token: Token, last_modified: timezone.datetime | None
+    ) -> tuple["AlliancesAllianceIdContactsGet", "Response"]:
         return esi.client.Contacts.GetAlliancesAllianceIdContacts(
             alliance_id=entity_id,
             token=token,
-        ).results()
+        ).results(last_modified=last_modified, return_response=True)
 
     @classmethod
     def get_contacts_model(cls):

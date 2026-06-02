@@ -40,8 +40,8 @@ classifiers = [
 ]
 dynamic = [ "version" ]
 dependencies = [
-    "allianceauth>=4.6,<6",
-    "django-esi>=8,<10",
+    "allianceauth>=5.1,<6",
+    "django-esi>=9.4,<10",
     "django-ninja~=1.4",
 ]
 urls.Changelog = "https://github.com/Maestro-Zacht/aa-contacts/releases"

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -82,10 +83,16 @@ class TestUpdateAllianceContacts(TestCase):
 
         self.token.refresh_from_db()
         self.assertEqual(
-            self.token.last_modified_labels, response_stub().headers["Last-Modified"]
+            self.token.last_modified_labels,
+            datetime.strptime(
+                response_stub().headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"
+            ).replace(tzinfo=timezone.utc),
         )
         self.assertEqual(
-            self.token.last_modified_contacts, response_stub().headers["Last-Modified"]
+            self.token.last_modified_contacts,
+            datetime.strptime(
+                response_stub().headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"
+            ).replace(tzinfo=timezone.utc),
         )
 
     @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
@@ -367,10 +374,16 @@ class TestUpdateCorporationContacts(TestCase):
 
         self.token.refresh_from_db()
         self.assertEqual(
-            self.token.last_modified_labels, response_stub().headers["Last-Modified"]
+            self.token.last_modified_labels,
+            datetime.strptime(
+                response_stub().headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"
+            ).replace(tzinfo=timezone.utc),
         )
         self.assertEqual(
-            self.token.last_modified_contacts, response_stub().headers["Last-Modified"]
+            self.token.last_modified_contacts,
+            datetime.strptime(
+                response_stub().headers["Last-Modified"], "%a, %d %b %Y %H:%M:%S %Z"
+            ).replace(tzinfo=timezone.utc),
         )
 
     @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")

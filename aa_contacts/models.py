@@ -160,56 +160,58 @@ class Contact(models.Model):
 
     @property
     def image_src(self) -> str:
-        if self.contact_type == self.ContactTypeOptions.CHARACTER:
-            return EveCharacter.generic_portrait_url(self.contact_id)
-        if self.contact_type == self.ContactTypeOptions.CORPORATION:
-            return EveCorporationInfo.generic_logo_url(self.contact_id)
-        if self.contact_type == self.ContactTypeOptions.ALLIANCE:
-            return EveAllianceInfo.generic_logo_url(self.contact_id)
-        if self.contact_type == self.ContactTypeOptions.FACTION:
-            return EveFactionInfo.generic_logo_url(self.contact_id)
-        return ""
+        match self.contact_type:
+            case self.ContactTypeOptions.CHARACTER:
+                return EveCharacter.generic_portrait_url(self.contact_id)
+            case self.ContactTypeOptions.CORPORATION:
+                return EveCorporationInfo.generic_logo_url(self.contact_id)
+            case self.ContactTypeOptions.ALLIANCE:
+                return EveAllianceInfo.generic_logo_url(self.contact_id)
+            case self.ContactTypeOptions.FACTION:
+                return EveFactionInfo.generic_logo_url(self.contact_id)
+            case _:
+                return ""
 
     @property
     def _load_contact_name(self) -> str:
-        if self.contact_type == self.ContactTypeOptions.CHARACTER:
-            try:
-                res = EveCharacter.objects.get(
-                    character_id=self.contact_id
-                ).character_name
-            except EveCharacter.DoesNotExist:
-                char = EveCharacter.objects.create_character(self.contact_id)
-                res = char.character_name
-        elif self.contact_type == self.ContactTypeOptions.CORPORATION:
-            try:
-                res = EveCorporationInfo.objects.get(
-                    corporation_id=self.contact_id
-                ).corporation_name
-            except EveCorporationInfo.DoesNotExist:
-                corp = EveCorporationInfo.objects.create_corporation(self.contact_id)
-                res = corp.corporation_name
-        elif self.contact_type == self.ContactTypeOptions.ALLIANCE:
-            try:
-                res = EveAllianceInfo.objects.get(
-                    alliance_id=self.contact_id
-                ).alliance_name
-            except EveAllianceInfo.DoesNotExist:
-                alliance = EveAllianceInfo.objects.create_alliance(self.contact_id)
-                res = alliance.alliance_name
-        elif self.contact_type == self.ContactTypeOptions.FACTION:
-            try:
-                res = EveFactionInfo.objects.get(
-                    faction_id=self.contact_id
-                ).faction_name
-            except EveFactionInfo.DoesNotExist:
-                faction = EveFactionInfo.provider.get_faction(self.contact_id)
-                EveFactionInfo.objects.create(
-                    faction_id=faction.id, faction_name=faction.name
-                )
-                res = faction.name
-        else:
-            msg = f"Unknown contact type: {self.contact_type}"
-            raise ValueError(msg)
+        match self.contact_type:
+            case self.ContactTypeOptions.CHARACTER:
+                try:
+                    res = EveCharacter.objects.get(
+                        character_id=self.contact_id
+                    ).character_name
+                except EveCharacter.DoesNotExist:
+                    char = EveCharacter.objects.create_character(self.contact_id)
+                    res = char.character_name
+            case self.ContactTypeOptions.CORPORATION:
+                try:
+                    res = EveCorporationInfo.objects.get(
+                        corporation_id=self.contact_id
+                    ).corporation_name
+                except EveCorporationInfo.DoesNotExist:
+                    corp = EveCorporationInfo.objects.create_corporation(
+                        self.contact_id
+                    )
+                    res = corp.corporation_name
+            case self.ContactTypeOptions.ALLIANCE:
+                try:
+                    res = EveAllianceInfo.objects.get(
+                        alliance_id=self.contact_id
+                    ).alliance_name
+                except EveAllianceInfo.DoesNotExist:
+                    alliance = EveAllianceInfo.objects.create_alliance(self.contact_id)
+                    res = alliance.alliance_name
+            case self.ContactTypeOptions.FACTION:
+                try:
+                    res = EveFactionInfo.objects.get(
+                        faction_id=self.contact_id
+                    ).faction_name
+                except EveFactionInfo.DoesNotExist:
+                    faction = EveFactionInfo.objects.create_faction(self.contact_id)
+                    res = faction.faction_name
+            case _:
+                msg = f"Unknown contact type: {self.contact_type}"
+                raise ValueError(msg)
 
         return res
 
@@ -285,6 +287,9 @@ class ContactToken(models.Model):
 
     last_update = models.DateTimeField(default=timezone.now)
 
+    last_modified_contacts = models.DateTimeField(null=True, blank=True)
+    last_modified_labels = models.DateTimeField(null=True, blank=True)
+
     objects: ClassVar[ContactTokenManager] = ContactTokenManager()
 
     class Meta:
@@ -342,7 +347,7 @@ class AllianceToken(ContactToken):
         return f"{self.alliance} Token"
 
     @classmethod
-    def visible_for(cls, user):
+    def visible_for(cls, user: User):
         if user.is_superuser:
             return cls.objects.all()
 
@@ -405,7 +410,7 @@ class CorporationToken(ContactToken):
         return f"{self.corporation} Token"
 
     @classmethod
-    def visible_for(cls, user):
+    def visible_for(cls, user: User):
         if user.is_superuser:
             return cls.objects.all()
 

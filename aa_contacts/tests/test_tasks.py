@@ -29,7 +29,7 @@ class TestUpdateAllianceContacts(TestCase):
         cls.alliance = user.profile.main_character.alliance
         token = user.token_set.first()
 
-        cls.token = AllianceToken.objects.create(
+        cls.token: AllianceToken = AllianceToken.objects.create(
             alliance=cls.alliance,
             token=token,
         )
@@ -82,10 +82,10 @@ class TestUpdateAllianceContacts(TestCase):
 
         self.token.refresh_from_db()
         self.assertEqual(
-            self.token.last_labels_update, response_stub().headers["Last-Modified"]
+            self.token.last_modified_labels, response_stub().headers["Last-Modified"]
         )
         self.assertEqual(
-            self.token.last_contacts_update, response_stub().headers["Last-Modified"]
+            self.token.last_modified_contacts, response_stub().headers["Last-Modified"]
         )
 
     @patch("aa_contacts.tasks.AllianceContactUpdater.get_labels_data")
@@ -314,7 +314,7 @@ class TestUpdateCorporationContacts(TestCase):
         cls.corporation = user.profile.main_character.corporation
         token = user.token_set.first()
 
-        cls.token = CorporationToken.objects.create(
+        cls.token: CorporationToken = CorporationToken.objects.create(
             corporation=cls.corporation,
             token=token,
         )
@@ -367,10 +367,10 @@ class TestUpdateCorporationContacts(TestCase):
 
         self.token.refresh_from_db()
         self.assertEqual(
-            self.token.last_labels_update, response_stub().headers["Last-Modified"]
+            self.token.last_modified_labels, response_stub().headers["Last-Modified"]
         )
         self.assertEqual(
-            self.token.last_contacts_update, response_stub().headers["Last-Modified"]
+            self.token.last_modified_contacts, response_stub().headers["Last-Modified"]
         )
 
     @patch("aa_contacts.tasks.CorporationContactUpdater.get_labels_data")

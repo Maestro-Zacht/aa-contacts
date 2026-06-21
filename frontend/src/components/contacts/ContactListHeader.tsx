@@ -90,6 +90,7 @@ function Header({ entityId, name, lastUpdate, updateFn, invalidateQueries }: Hea
 
 export function AllianceHeader({ allianceId }: { allianceId: number }) {
     const { t } = useTranslation();
+    const queryClient = useQueryClient();
     const { data, isLoading, error } = useQuery({
         queryKey: ['alliance', 'tokens', allianceId],
         queryFn: () => getAllianceToken(allianceId),
@@ -100,7 +101,6 @@ export function AllianceHeader({ allianceId }: { allianceId: number }) {
         return <p>{t("alliance.info.loading.error")}</p>;
     }
 
-    const queryClient = useQueryClient();
     const invalidateQueries = async () => {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['alliance', allianceId, 'contacts'] }),
@@ -126,6 +126,7 @@ export function AllianceHeader({ allianceId }: { allianceId: number }) {
 
 export function CorporationHeader({ corporationId }: { corporationId: number }) {
     const { t } = useTranslation();
+    const queryClient = useQueryClient();
     const { data, isLoading, error } = useQuery({
         queryKey: ['corporation', 'tokens', corporationId],
         queryFn: () => getCorporationToken(corporationId),
@@ -136,7 +137,6 @@ export function CorporationHeader({ corporationId }: { corporationId: number }) 
         return <p>{t("corporation.info.loading.error")}</p>;
     }
 
-    const queryClient = useQueryClient();
     const invalidateQueries = async () => {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['corporation', corporationId, 'contacts'] }),

@@ -139,13 +139,15 @@ lint.per-file-ignores."conftest.py" = [
     "ARG001",
     "D",
     "EM102",
+    "FBT001",
     "PLC0415",
+    "PLR2004",
     "PLR2004",
     "S101",
     "S105",
     "S106",
     "S107",
-    "SLF001"
+    "SLF001",
 ]
 # IGNORE RULES FOR TESTS
 # S101    # Flake8-bandit - asserts are standard in pytest

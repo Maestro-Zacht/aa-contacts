@@ -3,7 +3,12 @@ from typing import TYPE_CHECKING
 from allianceauth.authentication.models import CharacterOwnership
 from ninja import Path, Router
 
-from aa_contacts.api.schema import ContactSchema, UpdateContactSchema
+from aa_contacts.api.schema import (
+    ContactSchema,
+    ServerLinkInputSchema,
+    ServerLinkSchema,
+    UpdateContactSchema,
+)
 from aa_contacts.models import AllianceContact, AllianceToken
 from aa_contacts.tasks import update_alliance_contacts
 
@@ -31,7 +36,7 @@ def list_contacts(request, alliance_id: int = Path(...)):
     contacts = (
         AllianceContact.objects.with_contact_name()
         .filter(alliance__alliance_id=alliance_id)
-        .prefetch_related("labels")
+        .prefetch_related("labels", "server_links")
     )
 
     return 200, contacts
@@ -88,4 +93,93 @@ def edit_contact(
     contact.notes = data.notes
     contact.save(update_fields=["notes"])
 
+    return 200, None
+
+
+def _get_managed_contact(
+    user: "User", alliance_id: int, contact_pk: int
+) -> "AllianceContact | int":
+    ownerships = CharacterOwnership.objects.filter(user=user)
+    if (
+        not user.is_superuser
+        and not ownerships.filter(character__alliance_id=alliance_id).exists()
+    ) or not user.has_perm("aa_contacts.manage_alliance_contacts"):
+        return 403
+
+    if (
+        not AllianceToken.visible_for(user)
+        .filter(alliance__alliance_id=alliance_id)
+        .exists()
+    ):
+        return 404
+
+    try:
+        return AllianceContact.objects.get(
+            pk=contact_pk, alliance__alliance_id=alliance_id
+        )
+    except AllianceContact.DoesNotExist:
+        return 404
+
+
+@router.post(
+    "/{int:contact_pk}/server-links",
+    response={200: ServerLinkSchema, 403: None, 404: None},
+)
+def create_server_link(
+    request,
+    data: ServerLinkInputSchema,
+    contact_pk: int,
+    alliance_id: int = Path(...),
+):
+    contact = _get_managed_contact(request.user, alliance_id, contact_pk)
+    if isinstance(contact, int):
+        return contact, None
+
+    link = contact.server_links.create(**data.dict())
+
+    return 200, link
+
+
+@router.put(
+    "/{int:contact_pk}/server-links/{int:link_pk}",
+    response={200: ServerLinkSchema, 403: None, 404: None},
+)
+def update_server_link(
+    request,
+    data: ServerLinkInputSchema,
+    contact_pk: int,
+    link_pk: int,
+    alliance_id: int = Path(...),
+):
+    contact = _get_managed_contact(request.user, alliance_id, contact_pk)
+    if isinstance(contact, int):
+        return contact, None
+
+    if not contact.server_links.filter(pk=link_pk).exists():
+        return 404, None
+
+    contact.server_links.filter(pk=link_pk).update(**data.dict())
+    link = contact.server_links.get(pk=link_pk)
+
+    return 200, link
+
+
+@router.delete(
+    "/{int:contact_pk}/server-links/{int:link_pk}",
+    response={200: None, 403: None, 404: None},
+)
+def delete_server_link(
+    request,
+    contact_pk: int,
+    link_pk: int,
+    alliance_id: int = Path(...),
+):
+    contact = _get_managed_contact(request.user, alliance_id, contact_pk)
+    if isinstance(contact, int):
+        return contact, None
+
+    deletes = contact.server_links.filter(pk=link_pk).delete()
+
+    if deletes[0] == 0:
+        return 404, None
     return 200, None

@@ -3,9 +3,10 @@ from typing import TYPE_CHECKING, ClassVar
 
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
+from django.db.models import Manager
 from ninja import ModelSchema, Schema
 
-from aa_contacts.models import Contact
+from aa_contacts.models import Contact, ContactServerLink
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import User
@@ -59,6 +60,22 @@ class ContactLabelSchema(Schema):
     label_name: str
 
 
+class ServerLinkBaseSchema(Schema):
+    name: str
+    url: str
+    password: str
+    color: ContactServerLink.Color
+
+
+class ServerLinkSchema(ServerLinkBaseSchema):
+    id: int
+
+
+class ServerLinkInputSchema(ServerLinkBaseSchema):
+    password: str = ""
+    color: ContactServerLink.Color = ContactServerLink.Color.SECONDARY
+
+
 class ContactSchema(Schema):
     id: int
     contact_id: int
@@ -69,6 +86,9 @@ class ContactSchema(Schema):
     notes: str | None = None
     can_edit_notes: bool
     labels: list[ContactLabelSchema] = []  # noqa: RUF012
+    can_view_server_links: bool
+    can_manage_server_links: bool
+    server_links: list[ServerLinkSchema] = []  # noqa: RUF012
 
     @staticmethod
     def resolve_notes(obj: Contact, context) -> str | None:
@@ -85,6 +105,23 @@ class ContactSchema(Schema):
     def resolve_can_edit_notes(obj: Contact, context) -> bool:
         user: User = context["request"].user
         return obj.can_edit_notes(user)
+
+    @staticmethod
+    def resolve_server_links(obj: Contact, context) -> Manager[ContactServerLink]:
+        user: User = context["request"].user
+        if obj.can_view_server_links(user):
+            return obj.server_links.all()
+        return obj.server_links.none()
+
+    @staticmethod
+    def resolve_can_view_server_links(obj: Contact, context) -> bool:
+        user: User = context["request"].user
+        return obj.can_view_server_links(user)
+
+    @staticmethod
+    def resolve_can_manage_server_links(obj: Contact, context) -> bool:
+        user: User = context["request"].user
+        return obj.can_manage_server_links(user)
 
 
 class UpdateContactSchema(Schema):

@@ -218,6 +218,191 @@
                 ]
             }
         },
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links": {
+            "post": {
+                "operationId": "aa_contacts_api_alliance_contacts_create_server_link",
+                "summary": "Create Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerLinkSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServerLinkInputSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links/{link_pk}": {
+            "put": {
+                "operationId": "aa_contacts_api_alliance_contacts_update_server_link",
+                "summary": "Update Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "link_pk",
+                        "schema": {
+                            "title": "Link Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerLinkSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServerLinkInputSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "aa_contacts_api_alliance_contacts_delete_server_link",
+                "summary": "Delete Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "link_pk",
+                        "schema": {
+                            "title": "Link Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "alliance_id",
+                        "schema": {
+                            "title": "Alliance Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/corporations/tokens/": {
             "get": {
                 "operationId": "aa_contacts_api_corporation_tokens_get_list",
@@ -430,6 +615,191 @@
                 ]
             }
         },
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links": {
+            "post": {
+                "operationId": "aa_contacts_api_corporation_contacts_create_server_link",
+                "summary": "Create Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerLinkSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServerLinkInputSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links/{link_pk}": {
+            "put": {
+                "operationId": "aa_contacts_api_corporation_contacts_update_server_link",
+                "summary": "Update Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "link_pk",
+                        "schema": {
+                            "title": "Link Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerLinkSchema"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServerLinkInputSchema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "operationId": "aa_contacts_api_corporation_contacts_delete_server_link",
+                "summary": "Delete Server Link",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "contact_pk",
+                        "schema": {
+                            "title": "Contact Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "link_pk",
+                        "schema": {
+                            "title": "Link Pk",
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "corporation_id",
+                        "schema": {
+                            "title": "Corporation Id",
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "tags": [
+                    "contacts"
+                ],
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ]
+            }
+        },
         "/contacts/api/permissions/me": {
             "get": {
                 "operationId": "aa_contacts_api_permissions_get_me",
@@ -489,6 +859,7 @@
                         "type": "integer"
                     },
                     "alliance_name": {
+                        "description": "Alliance's name",
                         "maxLength": 254,
                         "title": "Alliance Name",
                         "type": "string"
@@ -501,6 +872,20 @@
                 ],
                 "title": "EveAllianceSchema",
                 "type": "object"
+            },
+            "Color": {
+                "enum": [
+                    "primary",
+                    "secondary",
+                    "success",
+                    "danger",
+                    "warning",
+                    "info",
+                    "light",
+                    "dark"
+                ],
+                "title": "Color",
+                "type": "string"
             },
             "ContactLabelSchema": {
                 "properties": {
@@ -562,6 +947,22 @@
                         },
                         "title": "Labels",
                         "type": "array"
+                    },
+                    "can_view_server_links": {
+                        "title": "Can View Server Links",
+                        "type": "boolean"
+                    },
+                    "can_manage_server_links": {
+                        "title": "Can Manage Server Links",
+                        "type": "boolean"
+                    },
+                    "server_links": {
+                        "default": [],
+                        "items": {
+                            "$ref": "#/components/schemas/ServerLinkSchema"
+                        },
+                        "title": "Server Links",
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -571,7 +972,9 @@
                     "contact_logo_url",
                     "contact_name",
                     "standing",
-                    "can_edit_notes"
+                    "can_edit_notes",
+                    "can_view_server_links",
+                    "can_manage_server_links"
                 ],
                 "title": "ContactSchema",
                 "type": "object"
@@ -586,6 +989,38 @@
                 "title": "ContactTypeOptions",
                 "type": "string"
             },
+            "ServerLinkSchema": {
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "url": {
+                        "title": "Url",
+                        "type": "string"
+                    },
+                    "password": {
+                        "title": "Password",
+                        "type": "string"
+                    },
+                    "color": {
+                        "$ref": "#/components/schemas/Color"
+                    },
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "url",
+                    "password",
+                    "color",
+                    "id"
+                ],
+                "title": "ServerLinkSchema",
+                "type": "object"
+            },
             "UpdateContactSchema": {
                 "properties": {
                     "notes": {
@@ -597,6 +1032,37 @@
                     "notes"
                 ],
                 "title": "UpdateContactSchema",
+                "type": "object"
+            },
+            "ServerLinkInputSchema": {
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "url": {
+                        "title": "Url",
+                        "type": "string"
+                    },
+                    "password": {
+                        "default": "",
+                        "title": "Password",
+                        "type": "string"
+                    },
+                    "color": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Color"
+                            }
+                        ],
+                        "default": "secondary"
+                    }
+                },
+                "required": [
+                    "name",
+                    "url"
+                ],
+                "title": "ServerLinkInputSchema",
                 "type": "object"
             },
             "CorporationTokenSchema": {
@@ -638,6 +1104,7 @@
                         "type": "integer"
                     },
                     "corporation_name": {
+                        "description": "Corporation's name",
                         "maxLength": 254,
                         "title": "Corporation Name",
                         "type": "string"

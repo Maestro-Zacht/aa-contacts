@@ -1,4 +1,7 @@
 import apiClient from "./ApiClient";
+import type { components } from "./Schema";
+
+type ServerLinkInputSchema = components["schemas"]["ServerLinkInputSchema"];
 
 
 export async function getUserPermission() {
@@ -122,6 +125,92 @@ export async function saveCorporationContactNotes(corporationId: number, contact
     )
     if (error) {
         console.error("Error saving corporation contact notes: ", error);
+        throw error;
+    }
+}
+
+export async function createAllianceServerLink(allianceId: number, contactPk: number, body: ServerLinkInputSchema) {
+    const { data, error } = await apiClient.POST(
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links",
+        {
+            params: { path: { alliance_id: allianceId, contact_pk: contactPk } },
+            body
+        }
+    );
+    if (error) {
+        console.error("Error creating alliance server link: ", error);
+        throw error;
+    }
+    return data;
+}
+
+export async function updateAllianceServerLink(allianceId: number, contactPk: number, linkPk: number, body: ServerLinkInputSchema) {
+    const { data, error } = await apiClient.PUT(
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links/{link_pk}",
+        {
+            params: { path: { alliance_id: allianceId, contact_pk: contactPk, link_pk: linkPk } },
+            body
+        }
+    );
+    if (error) {
+        console.error("Error updating alliance server link: ", error);
+        throw error;
+    }
+    return data;
+}
+
+export async function deleteAllianceServerLink(allianceId: number, contactPk: number, linkPk: number) {
+    const { error } = await apiClient.DELETE(
+        "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links/{link_pk}",
+        {
+            params: { path: { alliance_id: allianceId, contact_pk: contactPk, link_pk: linkPk } }
+        }
+    );
+    if (error) {
+        console.error("Error deleting alliance server link: ", error);
+        throw error;
+    }
+}
+
+export async function createCorporationServerLink(corporationId: number, contactPk: number, body: ServerLinkInputSchema) {
+    const { data, error } = await apiClient.POST(
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links",
+        {
+            params: { path: { corporation_id: corporationId, contact_pk: contactPk } },
+            body
+        }
+    );
+    if (error) {
+        console.error("Error creating corporation server link: ", error);
+        throw error;
+    }
+    return data;
+}
+
+export async function updateCorporationServerLink(corporationId: number, contactPk: number, linkPk: number, body: ServerLinkInputSchema) {
+    const { data, error } = await apiClient.PUT(
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links/{link_pk}",
+        {
+            params: { path: { corporation_id: corporationId, contact_pk: contactPk, link_pk: linkPk } },
+            body
+        }
+    );
+    if (error) {
+        console.error("Error updating corporation server link: ", error);
+        throw error;
+    }
+    return data;
+}
+
+export async function deleteCorporationServerLink(corporationId: number, contactPk: number, linkPk: number) {
+    const { error } = await apiClient.DELETE(
+        "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links/{link_pk}",
+        {
+            params: { path: { corporation_id: corporationId, contact_pk: contactPk, link_pk: linkPk } }
+        }
+    );
+    if (error) {
+        console.error("Error deleting corporation server link: ", error);
         throw error;
     }
 }

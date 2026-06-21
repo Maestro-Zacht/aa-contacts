@@ -16,6 +16,7 @@
     "word_one": "Alliance",
     "word_other": "Alliances"
   },
+  "cancel": "Cancel",
   "close": "Close",
   "contact": {
     "for": "{{name}} Contacts",
@@ -58,6 +59,25 @@
   "notes_edit": "Edit Notes",
   "save": "Save",
   "search": "Search",
+  "server_link": {
+    "add": "Add Server Link",
+    "color": "Color",
+    "create": "Create Server Link",
+    "delete": "Delete",
+    "delete_confirm": "Are you sure you want to delete this server link?",
+    "edit": "Edit Server Link",
+    "hide": "Hide",
+    "name": "Name",
+    "password": "Password",
+    "reveal": "Reveal",
+    "save": {
+      "error": "Error saving server link. Contact an administrator."
+    },
+    "url": "URL",
+    "view": "Server Link",
+    "word_one": "Server Link",
+    "word_other": "Server Links"
+  },
   "standings": "Standings",
   "unknown": "Unknown",
   "update": "Update"

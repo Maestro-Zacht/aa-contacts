@@ -20,7 +20,7 @@ import ServerLinkModal from "./ServerLinkModal";
 import { useTranslation } from "react-i18next";
 
 type ServerLinkInputSchema = components["schemas"]["ServerLinkInputSchema"];
-
+type ContactSchema = components["schemas"]["ContactSchema"];
 
 interface ContactTableProps {
     entityType: "Corporation" | "Alliance";
@@ -162,7 +162,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
-    const renderContactName = (data: string, type: string, row: components["schemas"]["ContactSchema"]) => {
+    const renderContactName = (data: string, type: string, row: ContactSchema) => {
         switch (type) {
             case 'display':
                 return <>
@@ -178,7 +178,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
-    const renderEditNotes = (data: boolean, type: string, row: components["schemas"]["ContactSchema"]) => {
+    const renderEditNotes = (data: boolean, type: string, row: ContactSchema) => {
         switch (type) {
             case 'display':
                 // console.log(data);
@@ -194,7 +194,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
-    const renderServerLinks = (data: components["schemas"]["ServerLinkSchema"][], type: string, row: components["schemas"]["ContactSchema"]) => {
+    const renderServerLinks = (data: components["schemas"]["ServerLinkSchema"][], type: string, row: ContactSchema) => {
         switch (type) {
             case 'display':
                 if (!row.can_view_server_links && !row.can_manage_server_links) return null;

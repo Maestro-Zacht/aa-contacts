@@ -50,7 +50,7 @@ def update_contacts(request, alliance_id: int = Path(...)):
     if (
         not user.is_superuser
         and not ownerships.filter(character__alliance_id=alliance_id).exists()
-    ):
+    ) or not user.has_perm("aa_contacts.manage_alliance_contacts"):
         return 403, None
 
     token = AllianceToken.visible_for(user).filter(alliance__alliance_id=alliance_id)

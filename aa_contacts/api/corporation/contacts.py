@@ -55,7 +55,7 @@ def update_contacts(request, corporation_id: int = Path(...)):
     if (
         not user.is_superuser
         and not ownerships.filter(character__corporation_id=corporation_id).exists()
-    ):
+    ) or not user.has_perm("aa_contacts.manage_corporation_contacts"):
         return 403, None
 
     token = CorporationToken.visible_for(user).filter(

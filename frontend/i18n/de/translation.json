@@ -16,6 +16,7 @@
     "word_one": "Allianz",
     "word_other": "Allianzen"
   },
+  "cancel": "",
   "close": "Schließen",
   "contact": {
     "for": "{{name}} Kontakte",
@@ -58,6 +59,25 @@
   "notes_edit": "Notizen bearbeiten",
   "save": "Speichern",
   "search": "Suche",
+  "server_link": {
+    "add": "",
+    "color": "",
+    "create": "",
+    "delete": "",
+    "delete_confirm": "",
+    "edit": "",
+    "hide": "",
+    "name": "",
+    "password": "",
+    "reveal": "",
+    "save": {
+      "error": ""
+    },
+    "url": "",
+    "view": "",
+    "word_one": "",
+    "word_other": ""
+  },
   "standings": "Ansehen",
   "unknown": "Unbekannt",
   "update": "Aktualisieren"

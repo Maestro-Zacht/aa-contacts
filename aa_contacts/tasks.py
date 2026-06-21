@@ -189,7 +189,7 @@ class BaseContactUpdater:
                     )
                 )
 
-                missing_contacts.filter(notes="").delete()
+                missing_contacts.filter(notes="", server_links__isnull=True).delete()
                 cls.get_contacts_model().labels.through.objects.filter(
                     **cls.get_labels_related_selector(missing_contacts.values("pk")),
                 ).delete()

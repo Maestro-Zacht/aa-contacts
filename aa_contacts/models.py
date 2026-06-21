@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import (
@@ -9,9 +9,24 @@ from allianceauth.eveonline.models import (
     EveFactionInfo,
 )
 from django.contrib.auth.models import User
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils import timezone
 from esi.models import Token
+
+
+class AnySchemeURLValidator(URLValidator):
+    """Like ``URLValidator`` but accepts a URL with any (well-formed) scheme."""
+
+    def __call__(self, value):
+        scheme = value.split("://", 1)[0].lower() if "://" in str(value) else ""
+        URLValidator(schemes=[scheme] if scheme else self.schemes)(value)
+
+
+class AnySchemeURLField(models.URLField):
+    """``URLField`` whose validation is not restricted to a fixed scheme list."""
+
+    default_validators: ClassVar = [AnySchemeURLValidator()]
 
 
 class General(models.Model):  # noqa: DJ008
@@ -23,6 +38,14 @@ class General(models.Model):  # noqa: DJ008
             ("manage_corporation_contacts", "Can manage corporation contacts"),
             ("view_alliance_notes", "Can view notes on alliance contacts"),
             ("view_corporation_notes", "Can view notes on corporation contacts"),
+            (
+                "view_alliance_server_links",
+                "Can view server links on alliance contacts",
+            ),
+            (
+                "view_corporation_server_links",
+                "Can view server links on corporation contacts",
+            ),
         )
 
 
@@ -139,6 +162,32 @@ class ContactLabel(models.Model):
         default_permissions = ()
 
 
+class ContactServerLink(models.Model):
+    class Color(models.TextChoices):
+        PRIMARY = "primary", "Blue"
+        SECONDARY = "secondary", "Gray"
+        SUCCESS = "success", "Green"
+        DANGER = "danger", "Red"
+        WARNING = "warning", "Yellow"
+        INFO = "info", "Cyan"
+        LIGHT = "light", "Light"
+        DARK = "dark", "Dark"
+
+    name = models.CharField(max_length=100)
+    url = AnySchemeURLField(max_length=500)
+    password = models.CharField(max_length=255, blank=True, default="")
+    color = models.CharField(
+        max_length=20, choices=Color.choices, default=Color.SECONDARY
+    )
+
+    class Meta:
+        abstract = True
+        default_permissions = ()
+
+    def __str__(self):
+        return self.name
+
+
 class Contact(models.Model):
     contact_id = models.BigIntegerField()
 
@@ -153,6 +202,9 @@ class Contact(models.Model):
     notes = models.TextField(blank=True, default="")
 
     objects: ClassVar[ContactManager] = ContactManager()
+
+    if TYPE_CHECKING:
+        server_links: models.manager.RelatedManager["ContactServerLink"]
 
     class Meta:
         abstract = True
@@ -281,6 +333,16 @@ class Contact(models.Model):
         msg = "Please implement in subclass"
         raise NotImplementedError(msg)
 
+    @classmethod
+    def can_view_server_links(cls, user: User) -> bool:
+        msg = "Please implement in subclass"
+        raise NotImplementedError(msg)
+
+    @classmethod
+    def can_manage_server_links(cls, user: User) -> bool:
+        msg = "Please implement in subclass"
+        raise NotImplementedError(msg)
+
 
 class ContactToken(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name="+")
@@ -318,6 +380,9 @@ class AllianceContact(Contact):
         AllianceContactLabel, blank=True, related_name="contacts"
     )
 
+    if TYPE_CHECKING:
+        server_links: models.manager.RelatedManager["AllianceContactServerLink"]
+
     class Meta:
         default_permissions = ()
 
@@ -333,6 +398,25 @@ class AllianceContact(Contact):
         return user.has_perm(
             "aa_contacts.manage_alliance_contacts"
         ) and cls.can_view_notes(user)
+
+    @classmethod
+    def can_view_server_links(cls, user: User) -> bool:
+        return user.has_perm("aa_contacts.view_alliance_server_links")
+
+    @classmethod
+    def can_manage_server_links(cls, user: User) -> bool:
+        return user.has_perm(
+            "aa_contacts.manage_alliance_contacts"
+        ) and cls.can_view_server_links(user)
+
+
+class AllianceContactServerLink(ContactServerLink):
+    contact = models.ForeignKey(
+        AllianceContact, on_delete=models.CASCADE, related_name="server_links"
+    )
+
+    class Meta:
+        default_permissions = ()
 
 
 class AllianceToken(ContactToken):
@@ -381,6 +465,9 @@ class CorporationContact(Contact):
 
     is_watched = models.BooleanField(null=True, blank=True, default=None)
 
+    if TYPE_CHECKING:
+        server_links: models.manager.RelatedManager["CorporationContactServerLink"]
+
     class Meta:
         default_permissions = ()
 
@@ -396,6 +483,25 @@ class CorporationContact(Contact):
         return user.has_perm(
             "aa_contacts.manage_corporation_contacts"
         ) and cls.can_view_notes(user)
+
+    @classmethod
+    def can_view_server_links(cls, user: User) -> bool:
+        return user.has_perm("aa_contacts.view_corporation_server_links")
+
+    @classmethod
+    def can_manage_server_links(cls, user: User) -> bool:
+        return user.has_perm(
+            "aa_contacts.manage_corporation_contacts"
+        ) and cls.can_view_server_links(user)
+
+
+class CorporationContactServerLink(ContactServerLink):
+    contact = models.ForeignKey(
+        CorporationContact, on_delete=models.CASCADE, related_name="server_links"
+    )
+
+    class Meta:
+        default_permissions = ()
 
 
 class CorporationToken(ContactToken):

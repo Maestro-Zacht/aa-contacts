@@ -89,6 +89,41 @@ export interface paths {
         patch: operations["aa_contacts_api_alliance_contacts_edit_contact"];
         trace?: never;
     };
+    "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Server Link */
+        post: operations["aa_contacts_api_alliance_contacts_create_server_link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contacts/api/alliances/{alliance_id}/contacts/{contact_pk}/server-links/{link_pk}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Server Link */
+        put: operations["aa_contacts_api_alliance_contacts_update_server_link"];
+        post?: never;
+        /** Delete Server Link */
+        delete: operations["aa_contacts_api_alliance_contacts_delete_server_link"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contacts/api/corporations/tokens/": {
         parameters: {
             query?: never;
@@ -174,6 +209,41 @@ export interface paths {
         patch: operations["aa_contacts_api_corporation_contacts_edit_contact"];
         trace?: never;
     };
+    "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Server Link */
+        post: operations["aa_contacts_api_corporation_contacts_create_server_link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/contacts/api/corporations/{corporation_id}/contacts/{contact_pk}/server-links/{link_pk}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Server Link */
+        put: operations["aa_contacts_api_corporation_contacts_update_server_link"];
+        post?: never;
+        /** Delete Server Link */
+        delete: operations["aa_contacts_api_corporation_contacts_delete_server_link"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/contacts/api/permissions/me": {
         parameters: {
             query?: never;
@@ -210,9 +280,17 @@ export interface components {
             logo_url: string;
             /** Alliance Id */
             alliance_id: number;
-            /** Alliance Name */
+            /**
+             * Alliance Name
+             * @description Alliance's name
+             */
             alliance_name: string;
         };
+        /**
+         * Color
+         * @enum {string}
+         */
+        Color: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark";
         /** ContactLabelSchema */
         ContactLabelSchema: {
             /** Label Name */
@@ -240,16 +318,51 @@ export interface components {
              * @default []
              */
             labels: components["schemas"]["ContactLabelSchema"][];
+            /** Can View Server Links */
+            can_view_server_links: boolean;
+            /** Can Manage Server Links */
+            can_manage_server_links: boolean;
+            /**
+             * Server Links
+             * @default []
+             */
+            server_links: components["schemas"]["ServerLinkSchema"][];
         };
         /**
          * ContactTypeOptions
          * @enum {string}
          */
         ContactTypeOptions: "character" | "corporation" | "alliance" | "faction";
+        /** ServerLinkSchema */
+        ServerLinkSchema: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /** Password */
+            password: string;
+            color: components["schemas"]["Color"];
+            /** Id */
+            id: number;
+        };
         /** UpdateContactSchema */
         UpdateContactSchema: {
             /** Notes */
             notes: string;
+        };
+        /** ServerLinkInputSchema */
+        ServerLinkInputSchema: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Password
+             * @default
+             */
+            password: string;
+            /** @default secondary */
+            color: components["schemas"]["Color"];
         };
         /** CorporationTokenSchema */
         CorporationTokenSchema: {
@@ -267,7 +380,10 @@ export interface components {
             logo_url: string;
             /** Corporation Id */
             corporation_id: number;
-            /** Corporation Name */
+            /**
+             * Corporation Name
+             * @description Corporation's name
+             */
             corporation_name: string;
         };
         /** UserPermissionsSchema */
@@ -451,6 +567,125 @@ export interface operations {
             };
         };
     };
+    aa_contacts_api_alliance_contacts_create_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServerLinkInputSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerLinkSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_alliance_contacts_update_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                link_pk: number;
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServerLinkInputSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerLinkSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_alliance_contacts_delete_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                link_pk: number;
+                alliance_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     aa_contacts_api_corporation_tokens_get_list: {
         parameters: {
             query?: never;
@@ -592,6 +827,125 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateContactSchema"];
             };
         };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_create_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServerLinkInputSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerLinkSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_update_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                link_pk: number;
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServerLinkInputSchema"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServerLinkSchema"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    aa_contacts_api_corporation_contacts_delete_server_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                contact_pk: number;
+                link_pk: number;
+                corporation_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {

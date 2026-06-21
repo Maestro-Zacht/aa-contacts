@@ -17,6 +17,7 @@
     "word_many": "Alleanze",
     "word_other": "Alleanze"
   },
+  "cancel": "",
   "close": "Chiudi",
   "contact": {
     "for": "Contatti di {{name}}",
@@ -62,6 +63,26 @@
   "notes_edit": "Modifica Note",
   "save": "Salva",
   "search": "Cerca",
+  "server_link": {
+    "add": "",
+    "color": "",
+    "create": "",
+    "delete": "",
+    "delete_confirm": "",
+    "edit": "",
+    "hide": "",
+    "name": "",
+    "password": "",
+    "reveal": "",
+    "save": {
+      "error": ""
+    },
+    "url": "",
+    "view": "",
+    "word_one": "",
+    "word_many": "",
+    "word_other": ""
+  },
   "standings": "Reputazioni",
   "unknown": "Sconosciuto",
   "update": "Aggiorna"

@@ -8,10 +8,18 @@ import Loading from "../Loading";
 import DataTable from "../tables/DataTableBase";
 import type { components } from "../../api/Schema";
 
-import { getAllianceContacts, getCorporationContacts, saveAllianceContactNotes, saveCorporationContactNotes } from "../../api/api";
+import {
+    getAllianceContacts, getCorporationContacts,
+    saveAllianceContactNotes, saveCorporationContactNotes,
+    createAllianceServerLink, updateAllianceServerLink, deleteAllianceServerLink,
+    createCorporationServerLink, updateCorporationServerLink, deleteCorporationServerLink,
+} from "../../api/api";
 import { useEffect, useRef, useState } from "react";
 import ContactNotesModal from "./ContactNotesModal";
+import ServerLinkModal from "./ServerLinkModal";
 import { useTranslation } from "react-i18next";
+
+type ServerLinkInputSchema = components["schemas"]["ServerLinkInputSchema"];
 
 
 interface ContactTableProps {
@@ -26,7 +34,8 @@ const columns = [
     { data: 'labels' },
     { data: 'standing' },
     { data: 'notes', visible: false },
-    { data: 'can_edit_notes', visible: false, orderable: false, searchable: false }
+    { data: 'can_edit_notes', visible: false, orderable: false, searchable: false },
+    { data: 'server_links', visible: false, orderable: false }
 ];
 
 export default function ContactTable({ entityType }: ContactTableProps) {
@@ -56,6 +65,48 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     });
 
+    const createServerLinkMutation = useMutation({
+        mutationFn: ({ contactPk, body }: { contactPk: number, body: ServerLinkInputSchema }) => {
+            return entityType === "Corporation" ?
+                createCorporationServerLink(entityId, contactPk, body) :
+                createAllianceServerLink(entityId, contactPk, body);
+        },
+        onSuccess: async () => {
+            await invalidateQueries();
+        },
+        onError: async () => {
+            await invalidateQueries();
+        }
+    });
+
+    const updateServerLinkMutation = useMutation({
+        mutationFn: ({ contactPk, linkPk, body }: { contactPk: number, linkPk: number, body: ServerLinkInputSchema }) => {
+            return entityType === "Corporation" ?
+                updateCorporationServerLink(entityId, contactPk, linkPk, body) :
+                updateAllianceServerLink(entityId, contactPk, linkPk, body);
+        },
+        onSuccess: async () => {
+            await invalidateQueries();
+        },
+        onError: async () => {
+            await invalidateQueries();
+        }
+    });
+
+    const deleteServerLinkMutation = useMutation({
+        mutationFn: ({ contactPk, linkPk }: { contactPk: number, linkPk: number }) => {
+            return entityType === "Corporation" ?
+                deleteCorporationServerLink(entityId, contactPk, linkPk) :
+                deleteAllianceServerLink(entityId, contactPk, linkPk);
+        },
+        onSuccess: async () => {
+            await invalidateQueries();
+        },
+        onError: async () => {
+            await invalidateQueries();
+        }
+    });
+
     const { data, isLoading, error } = useQuery({
         queryKey: [entityType.toLowerCase(), entityId, 'contacts'],
         queryFn: entityType === "Corporation" ?
@@ -70,7 +121,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
 
     const contacts = data || emptyContacts;
 
-    const handleNotesColumnVisibility = (e: { dt: DTApi }) => {
+    const handleColumnVisibility = (e: { dt: DTApi }) => {
         if (contacts.length === 0) return;
 
         const notesColumnVisible = !(contacts[0].notes === undefined || contacts[0].notes === null);
@@ -84,6 +135,12 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         if (editColumnVisible != e.dt.column(5).visible()) {
             console.debug(`Edit Notes column visibility toggled from ${e.dt.column(5).visible()} to ${editColumnVisible}`);
             e.dt.column(5).visible(editColumnVisible);
+        }
+
+        const serverLinksVisible = contacts[0].can_view_server_links;
+        if (serverLinksVisible != e.dt.column(6).visible()) {
+            console.debug(`Server Links column visibility toggled from ${e.dt.column(6).visible()} to ${serverLinksVisible}`);
+            e.dt.column(6).visible(serverLinksVisible);
         }
     }
 
@@ -137,6 +194,35 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
+    const renderServerLinks = (data: components["schemas"]["ServerLinkSchema"][], type: string, row: components["schemas"]["ContactSchema"]) => {
+        switch (type) {
+            case 'display':
+                if (!row.can_view_server_links && !row.can_manage_server_links) return null;
+                return <>
+                    {data.map(link => (
+                        <ServerLinkModal
+                            key={link.id}
+                            link={link}
+                            contactPk={row.id}
+                            canManage={row.can_manage_server_links}
+                            createMutation={createServerLinkMutation}
+                            updateMutation={updateServerLinkMutation}
+                            deleteMutation={deleteServerLinkMutation}
+                        />
+                    ))}
+                    {row.can_manage_server_links && <ServerLinkModal
+                        contactPk={row.id}
+                        canManage={row.can_manage_server_links}
+                        createMutation={createServerLinkMutation}
+                        updateMutation={updateServerLinkMutation}
+                        deleteMutation={deleteServerLinkMutation}
+                    />}
+                </>
+            default:
+                return data.map(link => link.name).join(", ");
+        }
+    }
+
     useEffect(() => {
         if (imagesLoaded > 0 && imagesLoaded >= contacts.length) {
             tableRef.current?.dt()?.columns.adjust();
@@ -151,11 +237,12 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                     <DataTable
                         columns={columns} data={contacts}
                         className="table table-aa"
-                        onPreDraw={handleNotesColumnVisibility}
+                        onPreDraw={handleColumnVisibility}
                         slots={{
                             0: renderContactName,
                             2: renderLabels,
                             5: renderEditNotes,
+                            6: renderServerLinks,
                         }}
                         ref={tableRef}
                         options={{
@@ -205,6 +292,22 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                             content: [],
                                         }
                                     ],
+                                },
+                                {
+                                    target: 6,
+                                    className: 'text-center',
+                                    columnControl: [
+                                        {
+                                            target: 'thead:0',
+                                            className: 'dtcc-row_no-bottom-border',
+                                            content: [],
+                                        },
+                                        {
+                                            target: 'thead:1',
+                                            className: 'dtcc-row_no-top-padding',
+                                            content: [],
+                                        }
+                                    ],
                                 }
                             ],
                             columnControl: [
@@ -236,6 +339,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                 <th>{t('standings')}</th>
                                 <th>{t('notes')}</th>
                                 <th></th>
+                                <th>{t('server_link.word', { count: 2 })}</th>
                             </tr>
                         </thead>
                     </DataTable>

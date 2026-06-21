@@ -33,9 +33,9 @@ const columns = [
     { data: 'contact_type' },
     { data: 'labels' },
     { data: 'standing' },
+    { data: 'server_links', visible: false, orderable: false },
     { data: 'notes', visible: false },
-    { data: 'can_edit_notes', visible: false, orderable: false, searchable: false },
-    { data: 'server_links', visible: false, orderable: false }
+    { data: 'can_edit_notes', visible: false, orderable: false, searchable: false }
 ];
 
 export default function ContactTable({ entityType }: ContactTableProps) {
@@ -127,20 +127,20 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         const notesColumnVisible = !(contacts[0].notes === undefined || contacts[0].notes === null);
         const editColumnVisible = contacts[0].can_edit_notes && notesColumnVisible;
 
-        if (notesColumnVisible != e.dt.column(4).visible()) {
-            console.debug(`Notes column visibility toggled from ${e.dt.column(4).visible()} to ${notesColumnVisible}`);
-            e.dt.column(4).visible(notesColumnVisible);
+        if (notesColumnVisible != e.dt.column(5).visible()) {
+            console.debug(`Notes column visibility toggled from ${e.dt.column(5).visible()} to ${notesColumnVisible}`);
+            e.dt.column(5).visible(notesColumnVisible);
         }
 
-        if (editColumnVisible != e.dt.column(5).visible()) {
-            console.debug(`Edit Notes column visibility toggled from ${e.dt.column(5).visible()} to ${editColumnVisible}`);
-            e.dt.column(5).visible(editColumnVisible);
+        if (editColumnVisible != e.dt.column(6).visible()) {
+            console.debug(`Edit Notes column visibility toggled from ${e.dt.column(6).visible()} to ${editColumnVisible}`);
+            e.dt.column(6).visible(editColumnVisible);
         }
 
         const serverLinksVisible = contacts[0].can_view_server_links;
-        if (serverLinksVisible != e.dt.column(6).visible()) {
-            console.debug(`Server Links column visibility toggled from ${e.dt.column(6).visible()} to ${serverLinksVisible}`);
-            e.dt.column(6).visible(serverLinksVisible);
+        if (serverLinksVisible != e.dt.column(4).visible()) {
+            console.debug(`Server Links column visibility toggled from ${e.dt.column(4).visible()} to ${serverLinksVisible}`);
+            e.dt.column(4).visible(serverLinksVisible);
         }
     }
 
@@ -241,8 +241,8 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                         slots={{
                             0: renderContactName,
                             2: renderLabels,
-                            5: renderEditNotes,
-                            6: renderServerLinks,
+                            4: renderServerLinks,
+                            6: renderEditNotes,
                         }}
                         ref={tableRef}
                         options={{
@@ -278,7 +278,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                     ],
                                 },
                                 {
-                                    target: 5,
+                                    targets: [4, 6],
                                     className: 'text-center',
                                     columnControl: [
                                         {
@@ -293,22 +293,6 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                         }
                                     ],
                                 },
-                                {
-                                    target: 6,
-                                    className: 'text-center',
-                                    columnControl: [
-                                        {
-                                            target: 'thead:0',
-                                            className: 'dtcc-row_no-bottom-border',
-                                            content: [],
-                                        },
-                                        {
-                                            target: 'thead:1',
-                                            className: 'dtcc-row_no-top-padding',
-                                            content: [],
-                                        }
-                                    ],
-                                }
                             ],
                             columnControl: [
                                 {
@@ -337,9 +321,9 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                                 <th>{t('contact.type')}</th>
                                 <th>{t('label.word', { count: 2 })}</th>
                                 <th>{t('standings')}</th>
+                                <th>{t('server_link.word', { count: 2 })}</th>
                                 <th>{t('notes')}</th>
                                 <th></th>
-                                <th>{t('server_link.word', { count: 2 })}</th>
                             </tr>
                         </thead>
                     </DataTable>

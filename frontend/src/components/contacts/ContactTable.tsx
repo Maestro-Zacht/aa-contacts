@@ -249,7 +249,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                             pageLength: 50,
                             columnDefs: [
                                 {
-                                    targets: [1, 2],
+                                    targets: [1, 2, 3],
                                     columnControl: [
                                         {
                                             target: 'thead:0',

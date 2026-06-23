@@ -45,8 +45,9 @@ class ContactApiTestMixin(_MixinBase):
 
     contact_target: EveCharacter
 
-    def setUpTestData(self):
-        self.contact_target = EveCharacterFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.contact_target = EveCharacterFactory()
 
     # -- owner / membership helpers ------------------------------------
 

@@ -537,6 +537,90 @@ class ContactApiTestMixin(_MixinBase):
         self.assertEqual(len(entry["server_links"]), 1)
 
 
+class PermissionsApiTest(TestCase):
+    url = "/contacts/api/permissions/me"
+
+    def test_no_permissions(self):
+        user = UserMainFactory()
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": False,
+                "can_manage_corporation_contacts": False,
+            },
+        )
+
+    def test_manage_alliance_only(self):
+        user = UserMainFactory(permissions=["aa_contacts.manage_alliance_contacts"])
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": False,
+            },
+        )
+
+    def test_manage_corporation_only(self):
+        user = UserMainFactory(permissions=["aa_contacts.manage_corporation_contacts"])
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": False,
+                "can_manage_corporation_contacts": True,
+            },
+        )
+
+    def test_manage_both(self):
+        user = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_alliance_contacts",
+                "aa_contacts.manage_corporation_contacts",
+            ]
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": True,
+            },
+        )
+
+    def test_superuser(self):
+        user = UserMainFactory(is_superuser=True)
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": True,
+            },
+        )
+
+
 class AllianceContactApiTest(ContactApiTestMixin, TestCase):
     owner_type = "alliance"
     contact_model = AllianceContact

@@ -354,6 +354,38 @@ class ContactApiTestMixin(_MixinBase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_create_server_link_invalid_url(self):
+        user = self._member(permissions=[self.manage_perm])
+        owner = self._owner(user)
+        self._make_token(user)
+        contact = self._make_contact(owner)
+
+        self.client.force_login(user)
+        response = self.client.post(
+            self.server_links_url(self._owner_id(owner), contact.pk),
+            data=json.dumps({"name": "Bad", "url": "not a url"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(contact.server_links.count(), 0)
+
+    def test_create_server_link_custom_scheme(self):
+        user = self._member(permissions=[self.manage_perm])
+        owner = self._owner(user)
+        self._make_token(user)
+        contact = self._make_contact(owner)
+
+        self.client.force_login(user)
+        response = self.client.post(
+            self.server_links_url(self._owner_id(owner), contact.pk),
+            data=json.dumps({"name": "TS", "url": "ts3server://ts.example.com"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(contact.server_links.get().url, "ts3server://ts.example.com")
+
     # == PUT .../contacts/{pk}/server-links/{link_pk} =================
 
     def test_update_server_link(self):
@@ -407,6 +439,25 @@ class ContactApiTestMixin(_MixinBase):
         self.assertEqual(response.status_code, 403)
         link.refresh_from_db()
         self.assertEqual(link.name, "Link")
+
+    def test_update_server_link_invalid_url(self):
+        user = self._member(permissions=[self.manage_perm])
+        owner = self._owner(user)
+        self._make_token(user)
+        contact = self._make_contact(owner)
+        link = self._make_link(contact)
+
+        self.client.force_login(user)
+        response = self.client.put(
+            self.server_link_detail_url(self._owner_id(owner), contact.pk, link.pk),
+            data=json.dumps({"name": "Updated", "url": "not a url"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 422)
+        link.refresh_from_db()
+        self.assertEqual(link.name, "Link")
+        self.assertEqual(link.url, "https://example.com")
 
     # == DELETE .../contacts/{pk}/server-links/{link_pk} ==============
 
@@ -535,6 +586,90 @@ class ContactApiTestMixin(_MixinBase):
         entry = response.json()[0]
         self.assertEqual(entry["notes"], "secret")
         self.assertEqual(len(entry["server_links"]), 1)
+
+
+class PermissionsApiTest(TestCase):
+    url = "/contacts/api/permissions/me"
+
+    def test_no_permissions(self):
+        user = UserMainFactory()
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": False,
+                "can_manage_corporation_contacts": False,
+            },
+        )
+
+    def test_manage_alliance_only(self):
+        user = UserMainFactory(permissions=["aa_contacts.manage_alliance_contacts"])
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": False,
+            },
+        )
+
+    def test_manage_corporation_only(self):
+        user = UserMainFactory(permissions=["aa_contacts.manage_corporation_contacts"])
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": False,
+                "can_manage_corporation_contacts": True,
+            },
+        )
+
+    def test_manage_both(self):
+        user = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_alliance_contacts",
+                "aa_contacts.manage_corporation_contacts",
+            ]
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": True,
+            },
+        )
+
+    def test_superuser(self):
+        user = UserMainFactory(is_superuser=True)
+
+        self.client.force_login(user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "can_manage_alliance_contacts": True,
+                "can_manage_corporation_contacts": True,
+            },
+        )
 
 
 class AllianceContactApiTest(ContactApiTestMixin, TestCase):

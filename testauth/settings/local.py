@@ -45,6 +45,7 @@ DEBUG = False
 # Add any additional apps to this list.
 INSTALLED_APPS += [
     'aa_contacts',
+    "charlink",
 ]
 
 # Register an application at https://developers.eveonline.com for Authentication

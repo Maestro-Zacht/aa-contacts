@@ -14,6 +14,44 @@ const COLORS: Color[] = [
     "primary", "secondary", "success", "danger", "warning", "info", "light", "dark"
 ];
 
+type ServerLinkFieldErrors = Partial<Record<keyof ServerLinkInputSchema, string>>;
+
+// django-ninja answers request-schema validation failures with HTTP 422 and a
+// `detail` array of pydantic errors. These responses aren't part of the
+// generated OpenAPI types (the endpoints only declare 200/403/404), so the
+// shape is described here and narrowed from the thrown error at runtime.
+interface NinjaValidationError {
+    detail: {
+        loc: (string | number)[];
+        msg: string;
+        type: string;
+    }[];
+}
+
+const SERVER_LINK_FIELDS = ["name", "url", "password", "color"] as const;
+
+function isNinjaValidationError(error: unknown): error is NinjaValidationError {
+    return (
+        typeof error === "object" &&
+        error !== null &&
+        Array.isArray((error as { detail?: unknown }).detail)
+    );
+}
+
+// Map pydantic `detail` entries onto our form fields. `loc` is
+// ["body", <param>, <field>], so the field name is its last element; pydantic
+// prefixes ValueError messages with "Value error, ", which we strip for display.
+function extractFieldErrors(error: NinjaValidationError): ServerLinkFieldErrors {
+    const errors: ServerLinkFieldErrors = {};
+    for (const { loc, msg } of error.detail) {
+        const field = loc[loc.length - 1];
+        if (typeof field === "string" && (SERVER_LINK_FIELDS as readonly string[]).includes(field)) {
+            errors[field as keyof ServerLinkInputSchema] = msg.replace(/^Value error, /, "");
+        }
+    }
+    return errors;
+}
+
 interface ServerLinkModalProps {
     link?: ServerLinkSchema;
     contactPk: number;
@@ -36,6 +74,8 @@ export default function ServerLinkModal({ link, contactPk, canManage, createMuta
     const [password, setPassword] = useState(link?.password ?? "");
     const [color, setColor] = useState<Color>(link?.color ?? "secondary");
     const [showPassword, setShowPassword] = useState(false);
+    // Per-field validation messages returned by the backend (HTTP 422).
+    const [fieldErrors, setFieldErrors] = useState<ServerLinkFieldErrors>({});
 
     // Restore fields/mode to their initial state (after close, or when cancelling an edit).
     const resetFields = () => {
@@ -45,7 +85,12 @@ export default function ServerLinkModal({ link, contactPk, canManage, createMuta
         setPassword(link?.password ?? "");
         setColor(link?.color ?? "secondary");
         setShowPassword(false);
+        setFieldErrors({});
     };
+
+    // Drop a field's error once the user edits it, so stale messages don't linger.
+    const clearFieldError = (field: keyof ServerLinkInputSchema) =>
+        setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
 
     const handleClose = () => {
         setShowModal(false);
@@ -63,10 +108,20 @@ export default function ServerLinkModal({ link, contactPk, canManage, createMuta
 
     // Persist the form: PUT when editing an existing link, POST when creating one.
     const handleSave = () => {
+        setFieldErrors({});
         const body: ServerLinkInputSchema = { name, url, password, color };
         const options = {
             onSuccess: () => handleClose(),
             onError: (error: Error) => {
+                // Surface django-ninja field validation errors inline; fall back
+                // to a generic alert for anything else (permission/network/etc.).
+                if (isNinjaValidationError(error)) {
+                    const errors = extractFieldErrors(error);
+                    if (Object.keys(errors).length > 0) {
+                        setFieldErrors(errors);
+                        return;
+                    }
+                }
                 console.error("Error saving server link: ", error);
                 alert(t("server_link.save.error"));
             }
@@ -151,28 +206,34 @@ export default function ServerLinkModal({ link, contactPk, canManage, createMuta
                                 <Form.Control
                                     type="text"
                                     value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    onChange={(e) => { setName(e.target.value); clearFieldError("name"); }}
                                     placeholder={t("server_link.name")}
                                     required
                                     autoFocus
+                                    isInvalid={!!fieldErrors.name}
                                 />
+                                <Form.Control.Feedback type="invalid">{fieldErrors.name}</Form.Control.Feedback>
                             </FloatingLabel>
                             <FloatingLabel controlId="serverLinkUrl" label={t("server_link.url")} className="mb-3">
                                 <Form.Control
                                     type="url"
                                     value={url}
-                                    onChange={(e) => setUrl(e.target.value)}
+                                    onChange={(e) => { setUrl(e.target.value); clearFieldError("url"); }}
                                     placeholder={t("server_link.url")}
                                     required
+                                    isInvalid={!!fieldErrors.url}
                                 />
+                                <Form.Control.Feedback type="invalid">{fieldErrors.url}</Form.Control.Feedback>
                             </FloatingLabel>
                             <FloatingLabel controlId="serverLinkPassword" label={t("server_link.password")} className="mb-3">
                                 <Form.Control
                                     type="text"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => { setPassword(e.target.value); clearFieldError("password"); }}
                                     placeholder={t("server_link.password")}
+                                    isInvalid={!!fieldErrors.password}
                                 />
+                                <Form.Control.Feedback type="invalid">{fieldErrors.password}</Form.Control.Feedback>
                             </FloatingLabel>
                             <FloatingLabel controlId="serverLinkColor" label={t("server_link.color")} className="mb-3">
                                 <Form.Select value={color} onChange={(e) => setColor(e.target.value as Color)}>

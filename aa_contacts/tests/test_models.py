@@ -14,6 +14,7 @@ from app_utils.testdata_factories import (
 )
 from app_utils.testing import add_character_to_user
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.test import TestCase
 
 from aa_contacts.models import (
@@ -86,6 +87,19 @@ class TestStandingFilter(TestCase):
             standing=0.0,
         )
         self.assertEqual(str(standing_filter), "Test Filter: Test Description")
+
+    def test_standing_lookup(self):
+        cases = [
+            (StandingFilter.ComparisonOptions.GREATER_THAN, Q(standing__gt=2.5)),
+            (StandingFilter.ComparisonOptions.GREATER_OR_EQUAL, Q(standing__gte=2.5)),
+            (StandingFilter.ComparisonOptions.LESS_THAN, Q(standing__lt=2.5)),
+            (StandingFilter.ComparisonOptions.LESS_OR_EQUAL, Q(standing__lte=2.5)),
+            (StandingFilter.ComparisonOptions.EQUAL, Q(standing=2.5)),
+        ]
+        for comparison, expected in cases:
+            with self.subTest(comparison=comparison):
+                standing_filter = StandingFilter(comparison=comparison, standing=2.5)
+                self.assertEqual(standing_filter._standing_lookup, expected)
 
     def test_audit_filter_at_least_one_all_chars(self):
         standing_filter = StandingFilter.objects.create(

@@ -114,12 +114,18 @@ export default function ContactTable({ entityType }: ContactTableProps) {
             () => getAllianceContacts(entityId),
     });
 
+    const contacts = data || emptyContacts;
+
+    useEffect(() => {
+        if (imagesLoaded > 0 && imagesLoaded >= contacts.length) {
+            tableRef.current?.dt()?.columns.adjust();
+        }
+    }, [imagesLoaded, contacts]);
+
     if (error) {
         console.error(error);
         return <p>{t("contact.loading.error")}</p>;
     }
-
-    const contacts = data || emptyContacts;
 
     const handleColumnVisibility = (e: { dt: DTApi }) => {
         if (contacts.length === 0) return;
@@ -144,7 +150,7 @@ export default function ContactTable({ entityType }: ContactTableProps) {
         }
     }
 
-    const renderLabels = (data: components["schemas"]["ContactLabelSchema"][], type: string, _: any) => {
+    const renderLabels = (data: components["schemas"]["ContactLabelSchema"][], type: string, _: ContactSchema) => {
         data.sort((a, b) => a.label_name.localeCompare(b.label_name));
         switch (type) {
             case 'display':
@@ -222,12 +228,6 @@ export default function ContactTable({ entityType }: ContactTableProps) {
                 return data.map(link => link.name).join(", ");
         }
     }
-
-    useEffect(() => {
-        if (imagesLoaded > 0 && imagesLoaded >= contacts.length) {
-            tableRef.current?.dt()?.columns.adjust();
-        }
-    }, [imagesLoaded, contacts]);
 
     return <>
         <Card>

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -12,17 +14,20 @@ from aa_contacts.models import (
 from aa_contacts.tasks import update_alliance_contacts, update_corporation_contacts
 
 if TYPE_CHECKING:
+    from celery import Task
     from django.contrib.auth.models import User
+    from django.db.models import QuerySet
 
     from aa_contacts.api.schema import ServerLinkInputSchema, UpdateContactSchema
+    from aa_contacts.models import Contact, ContactServerLink, ContactToken
 
 
 @dataclass(frozen=True)
 class ContactApiConfig:
-    contact_model: type
-    token_model: type
+    contact_model: type[Contact]
+    token_model: type[ContactToken]
     owner_type: str  # "alliance" | "corporation"
-    update_task: object
+    update_task: Task
 
 
 ALLIANCE = ContactApiConfig(
@@ -36,7 +41,7 @@ CORPORATION = ContactApiConfig(
 )
 
 
-def _owner_filter(cfg: ContactApiConfig, owner_id: int) -> dict:
+def _owner_filter(cfg: ContactApiConfig, owner_id: int) -> dict[str, int]:
     return {f"{cfg.owner_type}__{cfg.owner_type}_id": owner_id}
 
 
@@ -48,7 +53,7 @@ def _view_notes_perm(cfg: ContactApiConfig) -> str:
     return f"aa_contacts.view_{cfg.owner_type}_notes"
 
 
-def _is_member(user: "User", cfg: ContactApiConfig, owner_id: int) -> bool:
+def _is_member(user: User, cfg: ContactApiConfig, owner_id: int) -> bool:
     return (
         user.is_superuser
         or CharacterOwnership.objects.filter(
@@ -57,7 +62,7 @@ def _is_member(user: "User", cfg: ContactApiConfig, owner_id: int) -> bool:
     )
 
 
-def _has_contact_token(user: "User", cfg: ContactApiConfig, owner_id: int) -> bool:
+def _has_contact_token(user: User, cfg: ContactApiConfig, owner_id: int) -> bool:
     return (
         cfg.token_model.visible_for(user)
         .filter(**_owner_filter(cfg, owner_id))
@@ -65,7 +70,9 @@ def _has_contact_token(user: "User", cfg: ContactApiConfig, owner_id: int) -> bo
     )
 
 
-def list_contacts(cfg: ContactApiConfig, owner_id: int, user: "User"):
+def list_contacts(
+    cfg: ContactApiConfig, owner_id: int, user: User
+) -> tuple[int, QuerySet[Contact] | None]:
     if not _is_member(user, cfg, owner_id):
         return 403, None
 
@@ -81,7 +88,9 @@ def list_contacts(cfg: ContactApiConfig, owner_id: int, user: "User"):
     return 200, contacts
 
 
-def update_contacts(cfg: ContactApiConfig, owner_id: int, user: "User"):
+def update_contacts(
+    cfg: ContactApiConfig, owner_id: int, user: User
+) -> tuple[int, None]:
     if not _is_member(user, cfg, owner_id) or not user.has_perm(_manage_perm(cfg)):
         return 403, None
 
@@ -97,9 +106,9 @@ def edit_contact(
     cfg: ContactApiConfig,
     owner_id: int,
     contact_pk: int,
-    data: "UpdateContactSchema",
-    user: "User",
-):
+    data: UpdateContactSchema,
+    user: User,
+) -> tuple[int, None]:
     if not _is_member(user, cfg, owner_id) or not user.has_perms(
         [_manage_perm(cfg), _view_notes_perm(cfg)]
     ):
@@ -122,8 +131,8 @@ def edit_contact(
 
 
 def get_managed_contact(
-    cfg: ContactApiConfig, owner_id: int, contact_pk: int, user: "User"
-):
+    cfg: ContactApiConfig, owner_id: int, contact_pk: int, user: User
+) -> Contact | int:
     if not _is_member(user, cfg, owner_id) or not user.has_perm(_manage_perm(cfg)):
         return 403
 
@@ -142,9 +151,9 @@ def create_server_link(
     cfg: ContactApiConfig,
     owner_id: int,
     contact_pk: int,
-    data: "ServerLinkInputSchema",
-    user: "User",
-):
+    data: ServerLinkInputSchema,
+    user: User,
+) -> tuple[int, ContactServerLink | None]:
     contact = get_managed_contact(cfg, owner_id, contact_pk, user)
     if isinstance(contact, int):
         return contact, None
@@ -159,9 +168,9 @@ def update_server_link(  # noqa: PLR0913
     owner_id: int,
     contact_pk: int,
     link_pk: int,
-    data: "ServerLinkInputSchema",
-    user: "User",
-):
+    data: ServerLinkInputSchema,
+    user: User,
+) -> tuple[int, ContactServerLink | None]:
     contact = get_managed_contact(cfg, owner_id, contact_pk, user)
     if isinstance(contact, int):
         return contact, None
@@ -176,8 +185,8 @@ def update_server_link(  # noqa: PLR0913
 
 
 def delete_server_link(
-    cfg: ContactApiConfig, owner_id: int, contact_pk: int, link_pk: int, user: "User"
-):
+    cfg: ContactApiConfig, owner_id: int, contact_pk: int, link_pk: int, user: User
+) -> tuple[int, None]:
     contact = get_managed_contact(cfg, owner_id, contact_pk, user)
     if isinstance(contact, int):
         return contact, None
@@ -189,7 +198,9 @@ def delete_server_link(
     return 200, None
 
 
-def get_single_token(cfg: ContactApiConfig, owner_id: int, user: "User"):
+def get_single_token(
+    cfg: ContactApiConfig, owner_id: int, user: User
+) -> tuple[int, ContactToken | None]:
     if not _is_member(user, cfg, owner_id):
         return 403, None
 

@@ -483,11 +483,32 @@ class TestContactName(TestCase):
             _ = contact._load_contact_name
 
     @mock.patch("aa_contacts.models.EveCharacter.objects.create_character")
-    def test_load_contact_name_creates_missing_object(self, mock_create):
+    def test_load_contact_name_creates_missing_character(self, mock_create):
         mock_create.return_value = mock.Mock(character_name="Fetched Name")
         contact = self._contact(Contact.ContactTypeOptions.CHARACTER, 1_999_999_001)
         self.assertEqual(contact._load_contact_name, "Fetched Name")
         mock_create.assert_called_once_with(1_999_999_001)
+
+    @mock.patch("aa_contacts.models.EveCorporationInfo.objects.create_corporation")
+    def test_load_contact_name_creates_missing_corporation(self, mock_create):
+        mock_create.return_value = mock.Mock(corporation_name="Fetched Corp")
+        contact = self._contact(Contact.ContactTypeOptions.CORPORATION, 1_999_999_002)
+        self.assertEqual(contact._load_contact_name, "Fetched Corp")
+        mock_create.assert_called_once_with(1_999_999_002)
+
+    @mock.patch("aa_contacts.models.EveAllianceInfo.objects.create_alliance")
+    def test_load_contact_name_creates_missing_alliance(self, mock_create):
+        mock_create.return_value = mock.Mock(alliance_name="Fetched Alliance")
+        contact = self._contact(Contact.ContactTypeOptions.ALLIANCE, 1_999_999_003)
+        self.assertEqual(contact._load_contact_name, "Fetched Alliance")
+        mock_create.assert_called_once_with(1_999_999_003)
+
+    @mock.patch("aa_contacts.models.EveFactionInfo.objects.create_faction")
+    def test_load_contact_name_creates_missing_faction(self, mock_create):
+        mock_create.return_value = mock.Mock(faction_name="Fetched Faction")
+        contact = self._contact(Contact.ContactTypeOptions.FACTION, 1_999_999_004)
+        self.assertEqual(contact._load_contact_name, "Fetched Faction")
+        mock_create.assert_called_once_with(1_999_999_004)
 
     def test_contact_name_prefers_annotation(self):
         char = EveCharacterFactory()

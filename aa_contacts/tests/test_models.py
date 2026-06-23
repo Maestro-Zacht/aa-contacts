@@ -1,3 +1,11 @@
+from unittest import mock
+
+from allianceauth.eveonline.models import (
+    EveAllianceInfo,
+    EveCharacter,
+    EveCorporationInfo,
+    EveFactionInfo,
+)
 from app_utils.testdata_factories import (
     EveAllianceInfoFactory,
     EveCharacterFactory,
@@ -8,7 +16,12 @@ from app_utils.testing import add_character_to_user
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from aa_contacts.models import AllianceContact, CorporationContact, StandingFilter
+from aa_contacts.models import (
+    AllianceContact,
+    Contact,
+    CorporationContact,
+    StandingFilter,
+)
 
 
 class TestStandingFilter(TestCase):
@@ -392,3 +405,293 @@ class TestStandingFilter(TestCase):
                 User.objects.filter(pk=user_blue_and_red.pk),
             )[user_blue_and_red.pk]["check"]
         )
+
+
+class TestContactImageSrc(TestCase):
+    """``Contact.image_src`` returns the right CDN URL per contact type."""
+
+    @staticmethod
+    def _contact(contact_type, contact_id):
+        # Unsaved instance is enough: ``image_src`` only reads type and id.
+        return AllianceContact(contact_type=contact_type, contact_id=contact_id)
+
+    def test_character(self):
+        contact = self._contact(Contact.ContactTypeOptions.CHARACTER, 95465499)
+        self.assertEqual(contact.image_src, EveCharacter.generic_portrait_url(95465499))
+
+    def test_corporation(self):
+        contact = self._contact(Contact.ContactTypeOptions.CORPORATION, 98000001)
+        self.assertEqual(
+            contact.image_src, EveCorporationInfo.generic_logo_url(98000001)
+        )
+
+    def test_alliance(self):
+        contact = self._contact(Contact.ContactTypeOptions.ALLIANCE, 99000001)
+        self.assertEqual(contact.image_src, EveAllianceInfo.generic_logo_url(99000001))
+
+    def test_faction(self):
+        contact = self._contact(Contact.ContactTypeOptions.FACTION, 500001)
+        self.assertEqual(contact.image_src, EveFactionInfo.generic_logo_url(500001))
+
+    def test_unknown_type_returns_empty_string(self):
+        contact = self._contact("unknown", 1)
+        self.assertEqual(contact.image_src, "")
+
+
+class TestContactName(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.alliance = EveAllianceInfoFactory()
+
+    def _contact(self, contact_type, contact_id):
+        return AllianceContact.objects.create(
+            alliance=self.alliance,
+            contact_type=contact_type,
+            contact_id=contact_id,
+            standing=0.0,
+        )
+
+    def test_load_contact_name_character(self):
+        char = EveCharacterFactory()
+        contact = self._contact(Contact.ContactTypeOptions.CHARACTER, char.character_id)
+        self.assertEqual(contact._load_contact_name, char.character_name)
+
+    def test_load_contact_name_corporation(self):
+        corp = EveCorporationInfoFactory()
+        contact = self._contact(
+            Contact.ContactTypeOptions.CORPORATION, corp.corporation_id
+        )
+        self.assertEqual(contact._load_contact_name, corp.corporation_name)
+
+    def test_load_contact_name_alliance(self):
+        alliance = EveAllianceInfoFactory()
+        contact = self._contact(
+            Contact.ContactTypeOptions.ALLIANCE, alliance.alliance_id
+        )
+        self.assertEqual(contact._load_contact_name, alliance.alliance_name)
+
+    def test_load_contact_name_faction(self):
+        faction = EveFactionInfo.objects.create(
+            faction_id=500001, faction_name="Caldari State"
+        )
+        contact = self._contact(Contact.ContactTypeOptions.FACTION, faction.faction_id)
+        self.assertEqual(contact._load_contact_name, faction.faction_name)
+
+    def test_load_contact_name_unknown_type_raises(self):
+        contact = self._contact("unknown", 1)
+        with self.assertRaises(ValueError):
+            _ = contact._load_contact_name
+
+    @mock.patch("aa_contacts.models.EveCharacter.objects.create_character")
+    def test_load_contact_name_creates_missing_object(self, mock_create):
+        mock_create.return_value = mock.Mock(character_name="Fetched Name")
+        contact = self._contact(Contact.ContactTypeOptions.CHARACTER, 1_999_999_001)
+        self.assertEqual(contact._load_contact_name, "Fetched Name")
+        mock_create.assert_called_once_with(1_999_999_001)
+
+    def test_contact_name_prefers_annotation(self):
+        char = EveCharacterFactory()
+        contact = AllianceContact(
+            contact_type=Contact.ContactTypeOptions.CHARACTER,
+            contact_id=char.character_id,
+        )
+        contact.contact_name_annotation = "Annotated Name"
+        self.assertEqual(contact.contact_name, "Annotated Name")
+
+    def test_contact_name_falls_back_when_annotation_empty(self):
+        char = EveCharacterFactory()
+        contact = AllianceContact(
+            contact_type=Contact.ContactTypeOptions.CHARACTER,
+            contact_id=char.character_id,
+        )
+        contact.contact_name_annotation = ""
+        self.assertEqual(contact.contact_name, char.character_name)
+
+    def test_contact_name_falls_back_without_annotation(self):
+        char = EveCharacterFactory()
+        contact = AllianceContact(
+            contact_type=Contact.ContactTypeOptions.CHARACTER,
+            contact_id=char.character_id,
+        )
+        self.assertEqual(contact.contact_name, char.character_name)
+
+    def test_with_contact_name_populates_annotation(self):
+        char = EveCharacterFactory()
+        self._contact(Contact.ContactTypeOptions.CHARACTER, char.character_id)
+        contact = AllianceContact.objects.with_contact_name().get(
+            contact_id=char.character_id
+        )
+        self.assertEqual(contact.contact_name_annotation, char.character_name)
+        self.assertEqual(contact.contact_name, char.character_name)
+
+
+class TestFilterMissingContactName(TestCase):
+    """``filter_missing_contact_name`` flags contacts with no eve object."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.alliance = EveAllianceInfoFactory()
+
+    def _contact(self, contact_type, contact_id):
+        return AllianceContact.objects.create(
+            alliance=self.alliance,
+            contact_type=contact_type,
+            contact_id=contact_id,
+            standing=0.0,
+        )
+
+    def test_returns_only_contacts_without_eve_object(self):
+        char = EveCharacterFactory()
+        corp = EveCorporationInfoFactory()
+
+        existing_char = self._contact(
+            Contact.ContactTypeOptions.CHARACTER, char.character_id
+        )
+        existing_corp = self._contact(
+            Contact.ContactTypeOptions.CORPORATION, corp.corporation_id
+        )
+        missing_char = self._contact(
+            Contact.ContactTypeOptions.CHARACTER, 1_999_999_001
+        )
+        missing_alliance = self._contact(
+            Contact.ContactTypeOptions.ALLIANCE, 1_999_999_002
+        )
+
+        result = AllianceContact.filter_missing_contact_name(
+            [
+                existing_char.pk,
+                existing_corp.pk,
+                missing_char.pk,
+                missing_alliance.pk,
+            ]
+        )
+
+        self.assertCountEqual(result, [missing_char.pk, missing_alliance.pk])
+
+    def test_empty_input_returns_empty_list(self):
+        self.assertEqual(AllianceContact.filter_missing_contact_name([]), [])
+
+
+class TestAllianceContactPermissions(TestCase):
+    def test_can_view_notes(self):
+        self.assertTrue(
+            AllianceContact.can_view_notes(
+                UserMainFactory(permissions=["aa_contacts.view_alliance_notes"])
+            )
+        )
+        self.assertFalse(AllianceContact.can_view_notes(UserMainFactory()))
+
+    def test_can_edit_notes_requires_manage_and_view(self):
+        full = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_alliance_contacts",
+                "aa_contacts.view_alliance_notes",
+            ]
+        )
+        self.assertTrue(AllianceContact.can_edit_notes(full))
+
+        manage_only = UserMainFactory(
+            permissions=["aa_contacts.manage_alliance_contacts"]
+        )
+        self.assertFalse(AllianceContact.can_edit_notes(manage_only))
+
+        view_only = UserMainFactory(permissions=["aa_contacts.view_alliance_notes"])
+        self.assertFalse(AllianceContact.can_edit_notes(view_only))
+
+    def test_can_view_server_links(self):
+        self.assertTrue(
+            AllianceContact.can_view_server_links(
+                UserMainFactory(permissions=["aa_contacts.view_alliance_server_links"])
+            )
+        )
+        self.assertFalse(AllianceContact.can_view_server_links(UserMainFactory()))
+
+    def test_can_manage_server_links_requires_manage_and_view(self):
+        full = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_alliance_contacts",
+                "aa_contacts.view_alliance_server_links",
+            ]
+        )
+        self.assertTrue(AllianceContact.can_manage_server_links(full))
+
+        manage_only = UserMainFactory(
+            permissions=["aa_contacts.manage_alliance_contacts"]
+        )
+        self.assertFalse(AllianceContact.can_manage_server_links(manage_only))
+
+        view_only = UserMainFactory(
+            permissions=["aa_contacts.view_alliance_server_links"]
+        )
+        self.assertFalse(AllianceContact.can_manage_server_links(view_only))
+
+
+class TestCorporationContactPermissions(TestCase):
+    def test_can_view_notes(self):
+        self.assertTrue(
+            CorporationContact.can_view_notes(
+                UserMainFactory(permissions=["aa_contacts.view_corporation_notes"])
+            )
+        )
+        self.assertFalse(CorporationContact.can_view_notes(UserMainFactory()))
+
+    def test_can_edit_notes_requires_manage_and_view(self):
+        full = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_corporation_contacts",
+                "aa_contacts.view_corporation_notes",
+            ]
+        )
+        self.assertTrue(CorporationContact.can_edit_notes(full))
+
+        manage_only = UserMainFactory(
+            permissions=["aa_contacts.manage_corporation_contacts"]
+        )
+        self.assertFalse(CorporationContact.can_edit_notes(manage_only))
+
+        view_only = UserMainFactory(permissions=["aa_contacts.view_corporation_notes"])
+        self.assertFalse(CorporationContact.can_edit_notes(view_only))
+
+    def test_can_view_server_links(self):
+        self.assertTrue(
+            CorporationContact.can_view_server_links(
+                UserMainFactory(
+                    permissions=["aa_contacts.view_corporation_server_links"]
+                )
+            )
+        )
+        self.assertFalse(CorporationContact.can_view_server_links(UserMainFactory()))
+
+    def test_can_manage_server_links_requires_manage_and_view(self):
+        full = UserMainFactory(
+            permissions=[
+                "aa_contacts.manage_corporation_contacts",
+                "aa_contacts.view_corporation_server_links",
+            ]
+        )
+        self.assertTrue(CorporationContact.can_manage_server_links(full))
+
+        manage_only = UserMainFactory(
+            permissions=["aa_contacts.manage_corporation_contacts"]
+        )
+        self.assertFalse(CorporationContact.can_manage_server_links(manage_only))
+
+        view_only = UserMainFactory(
+            permissions=["aa_contacts.view_corporation_server_links"]
+        )
+        self.assertFalse(CorporationContact.can_manage_server_links(view_only))
+
+
+class TestContactBasePermissionsNotImplemented(TestCase):
+    """The abstract ``Contact`` base leaves permission checks to subclasses."""
+
+    def test_permission_methods_raise(self):
+        user = UserMainFactory()
+        for method in (
+            Contact.can_view_notes,
+            Contact.can_edit_notes,
+            Contact.can_view_server_links,
+            Contact.can_manage_server_links,
+        ):
+            with self.assertRaises(NotImplementedError):
+                method(user)

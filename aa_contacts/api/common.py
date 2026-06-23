@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class ContactApiConfig:
     contact_model: type[Contact]
-    token_model: type[ContactToken]
+    token_model: type[CorporationToken | AllianceToken]
     owner_type: str  # "alliance" | "corporation"
     update_task: Task
 
@@ -118,7 +118,7 @@ def edit_contact(
         return 404, None
 
     try:
-        contact = cfg.contact_model.objects.get(
+        contact: Contact = cfg.contact_model.objects.get(
             pk=contact_pk, **_owner_filter(cfg, owner_id)
         )
     except cfg.contact_model.DoesNotExist:

@@ -3,15 +3,19 @@ from typing import TYPE_CHECKING, ClassVar
 
 from allianceauth.eveonline.models import EveAllianceInfo, EveCorporationInfo
 from allianceauth.services.hooks import get_extension_logger
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Manager
 from ninja import ModelSchema, Schema
+from pydantic import field_validator
 
-from aa_contacts.models import Contact, ContactServerLink
+from aa_contacts.models import AnySchemeURLValidator, Contact, ContactServerLink
 
 if TYPE_CHECKING:
     from django.contrib.auth.models import User
 
 logger = get_extension_logger(__name__)
+
+_validate_url = AnySchemeURLValidator()
 
 
 class UserPermissionsSchema(Schema):
@@ -74,6 +78,16 @@ class ServerLinkSchema(ServerLinkBaseSchema):
 class ServerLinkInputSchema(ServerLinkBaseSchema):
     password: str = ""
     color: ContactServerLink.Color = ContactServerLink.Color.SECONDARY
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, value: str) -> str:
+        try:
+            _validate_url(value)
+        except DjangoValidationError as exc:
+            msg = "Enter a valid URL."
+            raise ValueError(msg) from exc
+        return value
 
 
 class ContactSchema(Schema):

@@ -1,3 +1,4 @@
+from typing import ClassVar
 from unittest import mock
 
 from allianceauth.eveonline.models import (
@@ -14,11 +15,14 @@ from app_utils.testdata_factories import (
 )
 from app_utils.testing import add_character_to_user
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from aa_contacts.models import (
     AllianceContact,
+    AnySchemeURLField,
+    AnySchemeURLValidator,
     Contact,
     CorporationContact,
     StandingFilter,
@@ -730,3 +734,56 @@ class TestContactBasePermissionsNotImplemented(TestCase):
         ):
             with self.assertRaises(NotImplementedError):
                 method(user)
+
+
+class TestAnySchemeURLValidator(SimpleTestCase):
+    """``AnySchemeURLValidator`` accepts any well-formed scheme but still
+    rejects malformed URLs (it is used on the server link ``url`` field)."""
+
+    VALID_URLS: ClassVar[list[str]] = [
+        # Standard web schemes.
+        "http://example.com",
+        "https://example.com",
+        "https://example.com:8080/path?query=1#frag",
+        "https://192.168.1.1",
+        "ftp://files.example.com",
+        # Custom/non-default schemes a server link may legitimately use.
+        "ts3server://ts.example.com",
+        "mumble://mumble.example.com:64738",
+        "discord://discord.gg/abc",
+        "ventrilo://vent.example.com",
+        # Scheme casing is normalised, not rejected.
+        "HTTPS://example.com",
+    ]
+
+    INVALID_URLS: ClassVar[list[str]] = [
+        "",
+        "not a url",
+        "example.com",
+        "justtext",
+        "https://",
+        "http://",
+        "://example.com",
+        "https://exa mple.com",
+    ]
+
+    def setUp(self):
+        self.validator = AnySchemeURLValidator()
+
+    def test_accepts_valid_urls(self):
+        for url in TestAnySchemeURLValidator.VALID_URLS:
+            with self.subTest(url=url):
+                self.validator(url)  # must not raise
+
+    def test_rejects_invalid_urls(self):
+        for url in TestAnySchemeURLValidator.INVALID_URLS:
+            with self.subTest(url=url), self.assertRaises(ValidationError):
+                self.validator(url)
+
+    def test_field_uses_validator(self):
+        self.assertTrue(
+            any(
+                isinstance(v, AnySchemeURLValidator)
+                for v in AnySchemeURLField().default_validators
+            )
+        )

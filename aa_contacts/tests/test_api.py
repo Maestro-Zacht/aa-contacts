@@ -438,6 +438,21 @@ class ContactApiTestMixin(_MixinBase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_delete_server_link_without_manage(self):
+        user = self._member()
+        owner = self._owner(user)
+        self._make_token(user)
+        contact = self._make_contact(owner)
+        link = self._make_link(contact)
+
+        self.client.force_login(user)
+        response = self.client.delete(
+            self.server_link_detail_url(self._owner_id(owner), contact.pk, link.pk),
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(contact.server_links.count(), 1)
+
     # == tokens =======================================================
 
     def test_tokens_list(self):

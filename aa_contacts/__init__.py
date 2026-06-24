@@ -6,4 +6,4 @@ __version__ = "0.11.1"
 
 __github_url__ = "https://github.com/Maestro-Zacht/aa-contacts"
 __app_name_ua__ = "aa-contacts"
-__esi_compatibility_date__ = "2025-12-16"
+__esi_compatibility_date__ = "2026-06-09"

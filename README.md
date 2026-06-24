@@ -18,6 +18,10 @@ The index page shows all the alliances and corporations that have been added and
 
 In every alliance or corporation view, the user can see the contacts and their standings. If it has the right [permissions](#permissions), the user can see and edit notes or trigger a manual update of the contacts.
 
+#### Server Links
+
+From version 1.0.0 users with the right [permissions](#permissions) can see or edit server links. These consist of a URL and an optional password and can be used to save discord invites, TS3 server details and such.
+
 ### Secure Groups integration
 
 If the [Secure Groups](https://github.com/Solar-Helix-Independent-Transport/allianceauth-secure-groups) plugin is installed, a new smart filter will appear in the admin panel of AA Contacts. It allows to filter users by the standings a corporation or alliance has set for them or their alliance/corporation.
@@ -88,9 +92,11 @@ Note: when multiple corporations/alliances are set, the logic applies an OR cond
 
 ## Permissions
 
-| Permission                    | Description                                                                                                           |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `manage_alliance_contacts`    | Can add tokens for the alliance and trigger manual updates                                                            |
-| `manage_corporation_contacts` | Can add tokens for the corporation and trigger manual updates                                                         |
-| `view_alliance_notes`         | Can view contact notes for alliance contacts. If combined with `manage_alliance_contacts`, can also edit notes.       |
-| `view_corporation_notes`      | Can view contact notes for corporation contacts. If combined with `manage_corporation_contacts`, can also edit notes. |
+| Permission                      | Description                                                                                                                 |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `manage_alliance_contacts`      | Can add tokens for the alliance and trigger manual updates                                                                  |
+| `manage_corporation_contacts`   | Can add tokens for the corporation and trigger manual updates                                                               |
+| `view_alliance_notes`           | Can view contact notes for alliance contacts. If combined with `manage_alliance_contacts`, can also edit notes.             |
+| `view_corporation_notes`        | Can view contact notes for corporation contacts. If combined with `manage_corporation_contacts`, can also edit notes.       |
+| `view_alliance_server_links`    | Can view server links for alliance contacts. if combined with `manage_alliance_contacts`, can also edit server links.       |
+| `view_corporation_server_links` | Can view server links for corporation contacts. if combined with `manage_corporation_contacts`, can also edit server links. |

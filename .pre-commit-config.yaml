@@ -1,5 +1,5 @@
 # Generated API files, not checked in linting
-exclude: ^frontend/(openapi\.json|src/api/Schema\.d\.ts)$
+exclude: ^frontend/(openapi\.json|pnpm-lock\.yaml|src/api/Schema\.d\.ts)$
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -1,0 +1,17 @@
+# Supply-chain settings mirrored from the machine-global config so they also
+# apply in CI and for other contributors.
+minimumReleaseAge: 10080
+minimumReleaseAgeIgnoreMissingTime: false
+trustPolicy: no-downgrade
+
+# trustPolicy compares publish dates, not semver, so a security backport on an
+# old major branch looks like a trust downgrade. semver@6.3.1 (2023-07-10) is
+# the ReDoS fix for the 6.x line, published by the npm team after the 7.5.x
+# releases that carry provenance -- a false positive, not an incident.
+trustPolicyExclude:
+  - 'semver@6.3.1'
+
+# strictDepBuilds defaults to true in pnpm 11: any dependency with an install
+# script must be listed here or `pnpm install` exits non-zero.
+allowBuilds:
+  '@swc/core': true # transitive via @vitejs/plugin-react

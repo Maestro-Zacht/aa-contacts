@@ -6,10 +6,10 @@
 version: 2
 updates:
   # Enable version updates for npm
-  - package-ecosystem: 'npm'
-    directory: '/frontend'
+  - package-ecosystem: "npm"
+    directory: "/frontend"
     schedule:
-      interval: 'weekly'
+      interval: "monthly"
     open-pull-requests-limit: 10
     groups:
       minor-patch:
@@ -48,12 +48,12 @@ updates:
         update-types: ["major"]
 
   # Enable version updates for GitHub Actions
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "monthly"
 
-  - package-ecosystem: 'pre-commit'
-    directory: '/'
+  - package-ecosystem: "pre-commit"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "monthly"

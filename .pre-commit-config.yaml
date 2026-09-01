@@ -73,7 +73,7 @@ repos:
         description: Ensure that files end with a newline.
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "1.7.1"
+    rev: "1.9.0"
     hooks:
       - id: tox-ini-fmt
         name: tox.ini formatter
@@ -88,7 +88,7 @@ repos:
         args:
           - --indent=4
         additional_dependencies:
-          - tox==4.56.0 # https://github.com/tox-dev/tox/releases/latest
+          - tox==4.61.1 # https://github.com/tox-dev/tox/releases/latest
 
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.25
@@ -98,7 +98,7 @@ repos:
         description: Validate the pyproject.toml file.
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.3
+    rev: 0.38.0
     hooks:
       - id: check-github-actions
         name: Check GitHub Actions

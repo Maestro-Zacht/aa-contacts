@@ -1,9 +1,9 @@
 # Generated API files, not checked in linting
-exclude: ^frontend/(openapi\.json|pnpm-lock\.yaml|src/api/Schema\.d\.ts)$
+exclude: ^(LICENSE|frontend/(openapi\.json|pnpm-lock\.yaml|src/api/Schema\.d\.ts))$
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: check-ast
         name: check-ast (Python)
@@ -73,14 +73,14 @@ repos:
         description: Ensure that files end with a newline.
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: "1.7.1"
+    rev: a55736a49694e73b4b885c78a827d9771515b9dd # frozen: 1.7.1
     hooks:
       - id: tox-ini-fmt
         name: tox.ini formatter
         description: Format the tox.ini file.
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.25.0
+    rev: f073523dfd27b01ec7997cc970a2a7b36c303460 # frozen: v2.25.0
     hooks:
       - id: pyproject-fmt
         name: pyproject.toml formatter
@@ -91,14 +91,14 @@ repos:
           - tox==4.56.0 # https://github.com/tox-dev/tox/releases/latest
 
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.25
+    rev: 4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7 # frozen: v0.25
     hooks:
       - id: validate-pyproject
         name: Validate pyproject.toml
         description: Validate the pyproject.toml file.
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.3
+    rev: 8ef330cbb7204d388aa7a620f9549bcea8009663 # frozen: 0.37.3
     hooks:
       - id: check-github-actions
         name: Check GitHub Actions
@@ -125,7 +125,7 @@ repos:
           - --verbose
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.18
+    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e # frozen: v0.15.18
     hooks:
       - id: ruff-check
       - id: ruff-format

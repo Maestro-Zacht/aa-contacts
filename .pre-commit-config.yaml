@@ -73,7 +73,7 @@ repos:
         description: Ensure that files end with a newline.
 
   - repo: https://github.com/tox-dev/tox-ini-fmt
-    rev: a55736a49694e73b4b885c78a827d9771515b9dd # frozen: 1.7.1
+    rev: 241ced4140307006cfd8b2b9ccfd43b1139cfe4a # frozen: 1.9.0
     hooks:
       - id: tox-ini-fmt
         name: tox.ini formatter

@@ -125,7 +125,7 @@ repos:
           - --verbose
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 77039ccbba72c8aede339c5f8ae29b42aced0a2e # frozen: v0.15.18
+    rev: 321478e58f4938179c6b86e4ddfa923d1547a49b # frozen: v0.16.6
     hooks:
       - id: ruff-check
       - id: ruff-format

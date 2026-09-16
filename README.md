@@ -75,10 +75,10 @@ Note: when multiple corporations/alliances are set, the logic applies an OR cond
 
     ```python
     # AA Contacts
-    CELERYBEAT_SCHEDULE['aa_contacts_update_all_contacts'] = {
-        'task': 'aa_contacts.tasks.update_all_contacts',
-        'schedule': crontab(minute='0'),
-        'apply_offset': True,
+    CELERYBEAT_SCHEDULE["aa_contacts_update_all_contacts"] = {
+        "task": "aa_contacts.tasks.update_all_contacts",
+        "schedule": crontab(minute="0"),
+        "apply_offset": True,
     }
     ```
 

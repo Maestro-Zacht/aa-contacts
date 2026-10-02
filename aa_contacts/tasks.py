@@ -11,7 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 from esi.exceptions import HTTPNotModified
 from esi.models import Token
-from httpx import Response
+from httpx2 import Response
 
 from .app_settings import TASK_JITTER
 from .models import (
@@ -39,7 +39,9 @@ if TYPE_CHECKING:
     ]
 
     for cls in classes:
-        setattr(cls, "__class_getitem__", classmethod(lambda cls, *args, **kwargs: cls))  # noqa: ARG005, B010
+        setattr(
+            cls, "__class_getitem__", classmethod(lambda cls, *args, **kwargs: cls)
+        )  # noqa: ARG005, B010
 
 
 logger = get_extension_logger(__name__)

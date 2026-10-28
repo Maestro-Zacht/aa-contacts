@@ -1,0 +1,84 @@
+{
+  "alliance": {
+    "info": {
+      "loading": {
+        "error": "Errore nel caricare le informazioni dell'alleanza. Contatta gli amministratori"
+      }
+    },
+    "loading": {
+      "error": "Errore nel caricare i token per i contatti dell'alleanza. Contatta gli amministratori"
+    },
+    "token": {
+      "add": "Aggiungi token per alleanza",
+      "missing": "Nessun token per i contatti dell'alleanza è stato trovato"
+    },
+    "unknown": "Alleanza sconosciuta",
+    "word_one": "Alleanza",
+    "word_other": "Alleanze"
+  },
+  "cancel": "Annulla",
+  "close": "Chiudi",
+  "contact": {
+    "for": "Contatti di {{name}}",
+    "loading": {
+      "error": "Errore caricamento dei contatti. Contatta gli amministratori"
+    },
+    "save": {
+      "error": "Errore nel salvare le note del contatto. Contatta gli amministratori"
+    },
+    "type": "Tipo di contatto",
+    "word_one": "Contatto",
+    "word_other": "Contatti"
+  },
+  "corporation": {
+    "info": {
+      "loading": {
+        "error": "Errore nel caricare le informazioni della corporazione. Contatta gli amministratori"
+      }
+    },
+    "loading": {
+      "error": "Errore nel caricare i token per i contatti della corporazione. Contatta gli amministratori"
+    },
+    "token": {
+      "add": "Aggiungi token per corporazione",
+      "missing": "Nessun token per i contatti della corporazione è stato trovato"
+    },
+    "unknown": "Corporazione sconosciuta",
+    "word_one": "Corporazione",
+    "word_other": "Corporazioni"
+  },
+  "error": "Errore {{code}}",
+  "info": "Informazioni",
+  "label": {
+    "word_one": "Etichetta",
+    "word_other": "Etichette"
+  },
+  "last_updated": "Ultimo aggiornamento:",
+  "loading": "Caricamento...",
+  "notes": "Note",
+  "notes_edit": "Modifica note",
+  "save": "Salva",
+  "search": "Cerca",
+  "server_link": {
+    "add": "Aggiungi link al server",
+    "color": "Colore",
+    "create": "Crea link al server",
+    "delete": "Elimina",
+    "delete_confirm": "Sei sicuro di voler eliminare questo link al server?",
+    "edit": "Modifica link al server",
+    "hide": "Nascondi",
+    "name": "Nome",
+    "password": "Password",
+    "reveal": "Mostra",
+    "save": {
+      "error": "Errore nel salvare il link al server. Contatta un amministratore."
+    },
+    "url": "URL",
+    "view": "Link al server",
+    "word_one": "Link al server",
+    "word_other": "Link ai server"
+  },
+  "standings": "Reputazioni",
+  "unknown": "Sconosciuto",
+  "update": "Aggiorna"
+}

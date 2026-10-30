@@ -8,7 +8,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eveonline', '0017_alliance_and_corp_names_are_not_unique'),
+        ('eveonline', '0019_v5squash'),
         ('esi', '0012_fix_token_type_choices'),
         ('aa_contacts', '0002_alter_general_options_alter_alliancecontact_labels_and_more'),
     ]
